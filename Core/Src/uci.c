@@ -6,8 +6,19 @@
 #include "uci.h"
 #include "util.h"
 #include "gen.h"
+#include "main.h"
 
 #define RESET -1
+
+#define BLUE_BOTTOMLED GPIO_PIN_15
+#define GREEN_LEFTLED LD4_Pin
+#define ORANGE_TOPLED LD3_Pin
+#define RED_RIGHTled LD5_Pin
+
+#define A_LED GPIO_PIN_15
+#define B_LED GPIO_PIN_14
+#define START_LED GPIO_PIN_11
+#define SELECT_LED GPIO_PIN_10
 
 static Board board;
 
@@ -36,9 +47,14 @@ void uci_main() {
     Move * currentMove = malloc(sizeof(Move));
 
     while (winner == RESET){
-        userInput = getInput(userInput);
+        userInput = getButtonPress();
         switch (userInput) {
             case APress:
+			  HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED | BLUE_BOTTOMLED | GREEN_LEFTLED | RED_RIGHTled);
+			  HAL_GPIO_WritePin(GPIOE, SELECT_LED | START_LED | A_LED | B_LED, GPIO_PIN_SET);
+			  HAL_Delay(200);
+			  HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED | BLUE_BOTTOMLED | GREEN_LEFTLED | RED_RIGHTled);
+			  HAL_GPIO_WritePin(GPIOE, SELECT_LED | START_LED | A_LED | B_LED, GPIO_PIN_RESET);
                 switch (state){
                     case waitingForFirst:
                         source = cursorPos;
@@ -185,8 +201,8 @@ void uci_main() {
             case RPress:
                 if(cursorPos % 8 != 7) cursorPos++;
                 break;
-            case SamePress:
-                break;
+            case NoPress:
+            	break;
         }
     }
     if(winner) {
@@ -197,14 +213,4 @@ void uci_main() {
         //display winner text on screen
         //return to main menu
     }
-}
-
-buttonPress getInput(buttonPress prevInput){
-
-    buttonPress currentFrame = APress;//GET FROM GLOBAL INPUT BUFFER
-    if(currentFrame != prevInput) {
-        return currentFrame;
-    }
-
-    return APress;
 }

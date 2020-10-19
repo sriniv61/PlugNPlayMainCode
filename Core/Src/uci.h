@@ -2,10 +2,9 @@
 #define UCI_H
 
 typedef enum gameState {waitingForFirst, waitingForSecond, waitingForThird, checking} gameState;
-typedef enum buttonPress {APress, BPress, StPress, SePress, LPress, RPress, UPress, DPress, SamePress} buttonPress;
+typedef enum buttonPress {APress, BPress, StPress, SePress, LPress, RPress, UPress, DPress, NoPress} buttonPress;
 
 void uci_main();
 buttonPress getInput(buttonPress prevInput);
-int getInput_DEMO();
 
 #endif

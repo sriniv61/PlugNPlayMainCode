@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "uci.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,7 +61,6 @@ static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 
 static void My_SPI2_INIT(void);
-int getButtonPress(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -102,15 +102,11 @@ int main(void)
   MX_SPI2_Init();
 
   My_SPI2_INIT();
-  /* USER CODE BEGIN 2 */
 
-
-  /* USER CODE END 2 */
-  uint8_t buttonPressed = 0; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
+  uci_main();
 
   while (1)
   {
-	  buttonPressed = getButtonPress();
 
 	  // Doing this after each button press to make sure that only one was selected correctly
 	  // Just to prove that we can receieve single button press
@@ -452,7 +448,7 @@ static void My_SPI2_INIT(void){
 	HAL_GPIO_Init(SPI2_MISO_GPIO_Port, &GPIO_InitStruct);
 }
 
-int getButtonPress(void){
+buttonPress getButtonPress(void){
 	// Inside the parenthesis is what we see on logic analyzer
 	// taking the inverse to more easily provide button precedence
 	uint8_t invertedData;
@@ -471,11 +467,12 @@ int getButtonPress(void){
 	uint8_t latch [1] = {0x80};
 	uint8_t data [1] = {0xff}; //Initializing to when no button is being pressed
 
-	uint8_t buttonPress = 0; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
+	buttonPress buttonPress = NoPress; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
 
-
-	while(data[0] == 0xff)
+	while(data[0] == 0xff) {
 		spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+		if(spiStatus != HAL_OK) break;
+	}
 
 	invertedData = ~(data[0]);
 
@@ -483,82 +480,98 @@ int getButtonPress(void){
 	if ((invertedData & a) == a){
 		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_SET);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_RESET);
 
-		buttonPress = 1;
+		buttonPress = APress;
 	}
 	else if ((invertedData & up) == up){
 		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
 
-		buttonPress = 2;
+		buttonPress = UPress;
 	}
 	else if((invertedData & down) == down){
 		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
 
-		buttonPress = 3;
+		buttonPress = DPress;
 	}
 	else if ((invertedData & right) == right){
 		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
 
-		buttonPress = 4;
+		buttonPress = RPress;
 	}
 	else if ((invertedData & left) == left){
 		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
 
-		buttonPress = 5;
+		buttonPress = LPress;
 	}
 	else if ((invertedData & start) == start){
 		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_SET);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_RESET);
 
-		buttonPress = 6;
+		buttonPress = StPress;
 	}
 	else if ((invertedData & select) == select){
 		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_SET);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_RESET);
 
-		buttonPress = 7;
+		buttonPress = SePress;
 	}
 	else if ((invertedData & b) == b){
 		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_SET);
 
-		while(data[0] != 0xff)
+		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(&hspi2, latch, data, 1, HAL_MAX_DELAY);
+			if(spiStatus != HAL_OK) break;
+		}
 
 		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_RESET);
 
-		buttonPress = 8;
+		buttonPress = BPress;
 	}
 
 	return buttonPress;
