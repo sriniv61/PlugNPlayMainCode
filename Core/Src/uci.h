@@ -5,7 +5,7 @@ typedef enum gameState {waitingForFirst, waitingForSecond, waitingForThird, chec
 typedef enum buttonPress {APress, BPress, StPress, SePress, LPress, RPress, UPress, DPress, SamePress} buttonPress;
 
 void uci_main();
-buttonPress getInput();
+buttonPress getInput(buttonPress prevInput);
 int getInput_DEMO();
 
 #endif

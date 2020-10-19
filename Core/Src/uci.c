@@ -14,7 +14,6 @@ static Board board;
 void uci_main() {
     setbuf(stdout, NULL);
     board_reset(&board);
-    board_print(&board);
 
     int winner = RESET; // 0 = white; 1 = black; 2 = draw
     int cursorPos = 0;
@@ -208,31 +207,4 @@ buttonPress getInput(buttonPress prevInput){
     }
 
     return APress;
-}
-
-int getInput_DEMO(gameState state){
-
-    int value = -1;
-    
-    switch(state) {
-        case waitingForFirst:
-            printf("Select a piece to move (0-63) or resign (66)\n");
-            break;
-        case waitingForSecond:
-            printf("Select a square to move this piece to (0-63), choose a different piece (64) or resign (66)\n");
-            break;
-        case waitingForThird:
-            printf("Select the type of piece to promote to (N=2, B=3, R=4, Q=5), choose a different square to move to (64), or resign (66)\n");
-            break;
-        default:
-            break;
-    }
-    scanf("%d", &value);
-
-    while(value < 0 || value > 66){
-        printf("Please enter a valid number (0-66)\n");
-        scanf("%d", &value);
-    }
-
-    return value;
 }
