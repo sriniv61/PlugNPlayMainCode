@@ -216,28 +216,40 @@ void board_set(Board *board, int sq, int piece) {
     }
 }
 
-void board_print(Board *board) {
+void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos) {
+	char * creturn = "\r";
+	char * newline = "\n";
     for (int rank = 7; rank >= 0; rank--) {
         for (int file = 0; file < 8; file++) {
-            char c;
-            int piece = board->squares[RF(rank, file)];
-            switch (PIECE(piece)) {
-                case EMPTY:  c = '.'; break;
-                case PAWN:   c = 'P'; break;
-                case KNIGHT: c = 'N'; break;
-                case BISHOP: c = 'B'; break;
-                case ROOK:   c = 'R'; break;
-                case QUEEN:  c = 'Q'; break;
-                case KING:   c = 'K'; break;
-            };
-            if (COLOR(piece)) {
-                c |= 0x20;
-            }
-            putchar(c);
+            char c[1] = ".";
+        	if(cursorPos == RF(rank,file)) {
+        		c[0] = 'c';
+        	}
+        	else {
+                int piece = board->squares[RF(rank, file)];
+                switch (PIECE(piece)) {
+                    case EMPTY:  c[0] = '.'; break;
+                    case PAWN:   c[0] = 'P'; break;
+                    case KNIGHT: c[0] = 'N'; break;
+                    case BISHOP: c[0] = 'B'; break;
+                    case ROOK:   c[0] = 'R'; break;
+                    case QUEEN:  c[0] = 'Q'; break;
+                    case KING:   c[0] = 'K'; break;
+                };
+                if (COLOR(piece)) {
+                    c[0] |= 0x20;
+                }
+        	}
+            HAL_UART_Transmit(huart2, (uint8_t *)(c), sizeof(c), 1);
+//            putchar(c);
         }
-        putchar('\n');
+        HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
+        HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(newline), 1);
+//        putchar('\n');
     }
-    putchar('\n');
+    HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
+    HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(newline), 1);
+//    putchar('\n');
 }
 
 void board_load_fen(Board *board, char *fen) {

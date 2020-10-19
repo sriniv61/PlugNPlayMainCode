@@ -29,8 +29,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "../Src/buttons.h"
 #include "../Src/uci.h"
-buttonPress getButtonPress(void);
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
