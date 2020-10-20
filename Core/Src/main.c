@@ -18,7 +18,6 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -37,16 +36,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
-#define BLUE_BOTTOMLED GPIO_PIN_15
-#define GREEN_LEFTLED LD4_Pin
-#define ORANGE_TOPLED LD3_Pin
-#define RED_RIGHTled LD5_Pin
-
-#define A_LED GPIO_PIN_15
-#define B_LED GPIO_PIN_14
-#define START_LED GPIO_PIN_11
-#define SELECT_LED GPIO_PIN_10
 
 /* USER CODE END PM */
 
@@ -116,9 +105,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-  buttonPress button = NoPress;
-//  char str[13] = "hello world\r\n";
-//  HAL_UART_Transmit(&huart2, (uint8_t *)str, sizeof(str), 1);
+  	buttonPress button = NoPress;
     uci_main(&hspi2, &huart2);
 
 	while (1)
