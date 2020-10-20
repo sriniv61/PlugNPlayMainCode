@@ -11,6 +11,7 @@
 #define RESET -1
 
 void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
+    bb_init();
 	Board board;
 	setbuf(stdout, NULL);
 	board_reset(&board);
@@ -24,13 +25,6 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int destination = RESET;
 	unsigned char promotion = RESET;
 	int index;
-
-	char *creturn = "\r";
-	char *newline = "\n";
-	char *up = "Up";
-	char *down = "Down";
-	char *left = "Left";
-	char *right = "Right";
 
 	Move legalMoves[MAX_MOVES];
 	int numLegalMoves = 0;

@@ -47,7 +47,8 @@ extern int OFFSET_BISHOP[64];
 extern int OFFSET_ROOK[64];
 
 extern bb ATTACK_BISHOP[5248];
-extern bb ATTACK_ROOK[1024];
+extern bb ATTACK_ROOK[9500];
+extern bb ATTACK_ROOK2[9500];
 
 extern bb HASH_WHITE_PAWN[64];
 extern bb HASH_BLACK_PAWN[64];
