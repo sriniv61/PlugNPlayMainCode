@@ -1,6 +1,0 @@
-util.c:8:14:prng	4	static
-util.c:14:6:prng_seed	16	static
-util.c:19:7:tokenize	32	static
-util.c:37:7:strip	24	static
-util.c:52:5:starts_with	16	static
-util.c:56:8:now	16	static
