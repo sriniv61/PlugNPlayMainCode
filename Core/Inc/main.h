@@ -32,6 +32,7 @@ extern "C" {
 #include "../Src/buttons.h"
 #include "../Src/uci.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,6 +61,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Controller_SELECT_Pin GPIO_PIN_7
+#define Controller_SELECT_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 #define CS_I2C_SPI_Pin GPIO_PIN_3
 #define CS_I2C_SPI_GPIO_Port GPIOE

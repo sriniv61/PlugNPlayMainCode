@@ -1,6 +1,10 @@
 #ifndef BB_H
 #define BB_H
 
+#include "stm32f4xx_hal.h"
+
+#define FLASH_USER_START_ADDR     ((uint32_t)0x08008000) /* Base @ of Sector 2, 16 Kbytes */
+
 #define BIT(sq) (1L << (sq))
 #define RF(rank, file) ((rank) * 8 + (file))
 
@@ -47,7 +51,7 @@ extern int OFFSET_BISHOP[64];
 extern int OFFSET_ROOK[64];
 
 extern bb ATTACK_BISHOP[5248];
-extern bb ATTACK_ROOK[102400];
+//extern bb ATTACK_ROOK[102400];
 
 extern bb HASH_WHITE_PAWN[64];
 extern bb HASH_BLACK_PAWN[64];
@@ -72,5 +76,8 @@ bb bb_random();
 bb bb_bishop(int sq, bb obstacles);
 bb bb_rook(int sq, bb obstacles);
 bb bb_queen(int sq, bb obstacles);
+
+void attack_rook_write(int index, bb value);
+bb attack_rook_read(int index);
 
 #endif

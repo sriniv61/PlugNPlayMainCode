@@ -37,6 +37,16 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+#define BLUE_BOTTOMLED GPIO_PIN_15
+#define GREEN_LEFTLED LD4_Pin
+#define ORANGE_TOPLED LD3_Pin
+#define RED_RIGHTled LD5_Pin
+
+#define A_LED GPIO_PIN_15
+#define B_LED GPIO_PIN_14
+#define START_LED GPIO_PIN_11
+#define SELECT_LED GPIO_PIN_10
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -92,30 +102,35 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
+
+  My_SPI2_INIT(&hspi2);
   /* USER CODE BEGIN 2 */
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  My_SPI2_INIT(&hspi2);
 
-	buttonPress button = NoPress;
-  //uci_main(&hspi2, &huart2);
+  buttonPress button = NoPress;
+//  char str[13] = "hello world\r\n";
+//  HAL_UART_Transmit(&huart2, (uint8_t *)str, sizeof(str), 1);
+    //uci_main(&hspi2, &huart2);
 
-  while (1)
-  {
+	while (1)
+	{
+	  button = getButtonPress(&hspi2, 0);
 
-	  //button = getButtonPress(&hspi2);
-
+	  button = getButtonPress(&hspi2, 1);
+/*
 	  HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED | BLUE_BOTTOMLED | GREEN_LEFTLED | RED_RIGHTled);
 	  HAL_GPIO_WritePin(GPIOE, SELECT_LED | START_LED | A_LED | B_LED, GPIO_PIN_SET);
-	  HAL_Delay(200);
+	  HAL_Delay(500);
 	  HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED | BLUE_BOTTOMLED | GREEN_LEFTLED | RED_RIGHTled);
 	  HAL_GPIO_WritePin(GPIOE, SELECT_LED | START_LED | A_LED | B_LED, GPIO_PIN_RESET);
-    /* USER CODE END WHILE */
-
+	  HAL_Delay(500);
+*/
     /* USER CODE BEGIN 3 */
 	}
   /* USER CODE END 3 */
@@ -253,8 +268,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_14
-                          |GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|Controller_SELECT_Pin|GPIO_PIN_10|GPIO_PIN_11
+                          |GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
@@ -263,10 +278,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15
                           |GPIO_PIN_4, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PE3 PE10 PE11 PE14
-                           PE15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_14
-                          |GPIO_PIN_15;
+  /*Configure GPIO pins : PE3 Controller_SELECT_Pin PE10 PE11
+                           PE14 PE15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|Controller_SELECT_Pin|GPIO_PIN_10|GPIO_PIN_11
+                          |GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -410,3 +425,4 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+>>>>>>> 81b9bf1e8ca4724174c7d1fc9a538aec5097a1cb
