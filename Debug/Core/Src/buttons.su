@@ -1,0 +1,2 @@
+buttons.c:10:13:getButtonPress	32	static
+buttons.c:142:6:My_SPI2_INIT	40	static

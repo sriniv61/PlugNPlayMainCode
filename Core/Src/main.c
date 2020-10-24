@@ -107,7 +107,7 @@ int main(void)
   while (1)
   {
 
-	  button = getButtonPress(&hspi2);
+	  //button = getButtonPress(&hspi2);
 
 	  HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED | BLUE_BOTTOMLED | GREEN_LEFTLED | RED_RIGHTled);
 	  HAL_GPIO_WritePin(GPIOE, SELECT_LED | START_LED | A_LED | B_LED, GPIO_PIN_SET);
