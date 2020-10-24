@@ -7,7 +7,7 @@
 
 #include "buttons.h"
 
-buttonPress getButtonPress(SPI_HandleTypeDef * hspi2){
+buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	// Inside the parenthesis is what we see on logic analyzer
 	// taking the inverse to more easily provide button precedence
 	uint8_t invertedData;
@@ -29,6 +29,12 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2){
 
 	buttonPress buttonPress = NoPress; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
 
+	if (controller == 0){
+		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_RESET);
+	}
+	else{
+		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_SET);
+	}
 	while(data[0] == 0xff) {
 		spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 		HAL_Delay(1);

@@ -85,7 +85,6 @@ int OFFSET_BISHOP[64];
 int OFFSET_ROOK[64];
 
 bb ATTACK_BISHOP[5248];
-bb ATTACK_ROOK[9500];
 
 bb HASH_WHITE_PAWN[64];
 bb HASH_BLACK_PAWN[64];
@@ -238,11 +237,13 @@ void bb_init() {
             }
             bb value = bb_slide_rook(sq, 0, obstacles);
             int index = (obstacles * MAGIC_ROOK[sq]) >> SHIFT_ROOK[sq];
-            bb previous = ATTACK_ROOK[offset + index];
+            bb previous = attack_rook_read(offset + index);
+//            bb previous = ATTACK_ROOK[offset + index];
             if (previous && previous != value) {
                 printf("ERROR: invalid ATTACK_ROOK table\n");
             }
-            ATTACK_ROOK[offset + index] = value;
+            attack_rook_write(offset + index, value);
+//            ATTACK_ROOK[offset + index] = value;
         }
         OFFSET_ROOK[sq] = offset;
         offset += 1 << (64 - SHIFT_ROOK[sq]);
@@ -272,6 +273,26 @@ void bb_init() {
     }
 }
 
+void attack_rook_write(int index, bb value) {
+	HAL_FLASH_Unlock();
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)(FLASH_USER_START_ADDR + index * 8), (uint32_t)(value)) != HAL_OK) {
+		HAL_FLASH_GetError();
+		while(1);
+	}
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)(FLASH_USER_START_ADDR + index * 8 + 4), (uint32_t)(value >> 32)) != HAL_OK) {
+		HAL_FLASH_GetError();
+		while(1);
+	}
+	HAL_FLASH_Lock();
+}
+
+bb attack_rook_read(int index) {
+	HAL_FLASH_Unlock();
+	bb retval = *(bb*)(FLASH_USER_START_ADDR + index * 8);
+	HAL_FLASH_Lock();
+	return retval;
+}
+
 bb bb_bishop(int sq, bb obstacles) {
     bb value = obstacles & BB_BISHOP_6[sq];
     int index = (value * MAGIC_BISHOP[sq]) >> SHIFT_BISHOP[sq];
@@ -281,7 +302,7 @@ bb bb_bishop(int sq, bb obstacles) {
 bb bb_rook(int sq, bb obstacles) {
     bb value = obstacles & BB_ROOK_6[sq];
     int index = (value * MAGIC_ROOK[sq]) >> SHIFT_ROOK[sq];
-    return ATTACK_ROOK[index + OFFSET_ROOK[sq]];
+    return attack_rook_read(index + OFFSET_ROOK[sq]);
 }
 
 bb bb_queen(int sq, bb obstacles) {

@@ -11,7 +11,8 @@
 #define RESET -1
 
 void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
-    bb_init();
+//    bb_init();
+//    return;
 	Board board;
 	setbuf(stdout, NULL);
 	board_reset(&board);
@@ -38,7 +39,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 
 	board_print(&board, huart2, cursorPos);
 	while (winner == RESET) {
-		userInput = getButtonPress(hspi2);
+		userInput = getButtonPress(hspi2, 0);
 		switch (userInput) {
 		case APress:
 			switch (state) {

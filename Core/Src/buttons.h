@@ -20,9 +20,11 @@
 #define START_LED GPIO_PIN_11
 #define SELECT_LED GPIO_PIN_10
 
+#define BUTTON_SELECT GPIO_PIN_7
+
 typedef enum buttonPress {APress, BPress, StPress, SePress, LPress, RPress, UPress, DPress, NoPress} buttonPress;
 
-buttonPress getButtonPress(SPI_HandleTypeDef * hspi2);
+buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller);
 void My_SPI2_INIT(SPI_HandleTypeDef * hspi2);
 
 
