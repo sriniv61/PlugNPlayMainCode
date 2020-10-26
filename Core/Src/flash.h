@@ -10,6 +10,10 @@
 
 
 #include "stm32f4xx_hal.h"
+static uint32_t GetSector(uint32_t Address);
+static uint32_t GetSectorSize(uint32_t Sector);
+void EraseFlash();
+uint64_t readFlash(int index);
 
 
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000) /* Base @ of Sector 0, 16 Kbytes */
