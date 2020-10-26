@@ -14,16 +14,13 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
 uint32_t FirstSector = 0, NbOfSectors = 0, Address = 0, EndAddr = 0;
 uint32_t SectorError = 0;
 __IO uint32_t data32 = 0 , MemoryProgramStatus = 0;
-
-/*Variable used for Erase procedure*/
 static FLASH_EraseInitTypeDef EraseInitStruct;
 
 /* Private function prototypes -----------------------------------------------*/
-static uint32_t GetSector(uint32_t Address);
-static uint32_t GetSectorSize(uint32_t Sector);
 
 
 static uint32_t GetSector(uint32_t Address)
@@ -103,8 +100,11 @@ return sectorsize;
 
 void EraseFlash() {
 	  HAL_FLASH_Unlock();
+
 	  /* Erase the user Flash area
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
+
+	  /* Get the 1st sector to erase */
 	  FirstSector = GetSector(FLASH_USER_START_ADDR);
 	  /* Get the number of sector to erase from 1st sector*/
 	  NbOfSectors = GetSector(FLASH_USER_END_ADDR) - FirstSector + 1;
@@ -126,6 +126,11 @@ void EraseFlash() {
 	    {
 	    }
 	  }
+
+	  /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
+	     you have to make sure that these data are rewritten before they are accessed during code
+	     execution. If this cannot be done safely, it is recommended to flush the caches by setting the
+	     DCRST and ICRST bits in the FLASH_CR register. */
 	  __HAL_FLASH_DATA_CACHE_DISABLE();
 	  __HAL_FLASH_INSTRUCTION_CACHE_DISABLE();
 
@@ -135,21 +140,12 @@ void EraseFlash() {
 	  __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
 	  __HAL_FLASH_DATA_CACHE_ENABLE();
 
-	  Address = FLASH_USER_START_ADDR;
-	  if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Address, (uint64_t)DATA_32) == HAL_OK) {
-			HAL_FLASH_GetError();
-			while(1);
-		}
-
-
-
 	  /* Program the user Flash area word by word
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
 
 	  Address = FLASH_USER_START_ADDR;
-	  EndAddr = FLASH_USER_END_ADDR;
 
-	  while (Address < EndAddr)
+	  while (Address < FLASH_USER_END_ADDR)
 	  {
 	    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, DATA_32) == HAL_OK)
 	    {
@@ -164,10 +160,18 @@ void EraseFlash() {
 	      }
 	    }
 	  }
+
+	  /* Lock the Flash to disable the flash control register access (recommended
+	     to protect the FLASH memory against possible unwanted operation) *********/
+	  HAL_FLASH_Lock();
+
+	  /* Check if the programmed data is OK
+	      MemoryProgramStatus = 0: data programmed correctly
+	      MemoryProgramStatus != 0: number of words not programmed correctly ******/
 	  Address = FLASH_USER_START_ADDR;
 	  MemoryProgramStatus = 0;
 
-	  while (Address < EndAddr)
+	  while (Address < FLASH_USER_END_ADDR)
 	  {
 	    data32 = *(__IO uint32_t*)Address;
 
@@ -178,6 +182,10 @@ void EraseFlash() {
 
 	    Address = Address + 4;
 	  }
+}
 
-	  HAL_FLASH_Lock();
+uint64_t readFlash(int index) {
+	Address = FLASH_USER_START_ADDR + (index * 8);
+	uint64_t data = *(__IO uint64_t*)Address;
+	return data;
 }

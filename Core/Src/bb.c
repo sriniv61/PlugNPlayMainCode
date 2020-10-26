@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "bb.h"
 #include "util.h"
+#include "flash.h"
 
 bb BB_KNIGHT[64];
 bb BB_KING[64];
@@ -242,7 +243,7 @@ void bb_init() {
             if (previous && previous != value) {
                 printf("ERROR: invalid ATTACK_ROOK table\n");
             }
-            attack_rook_write(offset + index, value);
+//            attack_rook_write(offset + index, value);
 //            ATTACK_ROOK[offset + index] = value;
         }
         OFFSET_ROOK[sq] = offset;
@@ -275,22 +276,24 @@ void bb_init() {
 
 void attack_rook_write(int index, bb value) {
 	HAL_FLASH_Unlock();
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)(FLASH_USER_START_ADDR + index * 8), (uint32_t)(value)) != HAL_OK) {
-		HAL_FLASH_GetError();
-		while(1);
-	}
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)(FLASH_USER_START_ADDR + index * 8 + 4), (uint32_t)(value >> 32)) != HAL_OK) {
-		HAL_FLASH_GetError();
-		while(1);
+	for(int i = 0; i < 8; i++){
+		uint64_t valToWrite = (uint8_t)(value >> (i * 8));
+		uint32_t addr = (uint32_t)(FLASH_USER_START_ADDR + index * sizeof(long long) + i);
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, addr, valToWrite) != HAL_OK) {
+			HAL_FLASH_GetError();
+		}
 	}
 	HAL_FLASH_Lock();
+	uint64_t checkVal = readFlash(index);
+	if(checkVal != (uint64_t)value) {
+		while(1);
+	}
 }
 
 bb attack_rook_read(int index) {
-	HAL_FLASH_Unlock();
-	bb retval = *(bb*)(FLASH_USER_START_ADDR + index * 8);
-	HAL_FLASH_Lock();
-	return retval;
+	uint32_t Address = FLASH_USER_START_ADDR + (index * 8);
+	uint64_t data = *(__IO uint64_t*)Address;
+	return data;
 }
 
 bb bb_bishop(int sq, bb obstacles) {

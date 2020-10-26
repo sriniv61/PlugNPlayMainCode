@@ -31,6 +31,7 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 #include "../Src/buttons.h"
 #include "../Src/uci.h"
+#include "../Src/flash.h"
 
 
 /* Private includes ----------------------------------------------------------*/

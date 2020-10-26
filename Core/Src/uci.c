@@ -11,7 +11,7 @@
 #define RESET -1
 
 void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
-//    bb_init();
+    bb_init();
 //    return;
 	Board board;
 	setbuf(stdout, NULL);

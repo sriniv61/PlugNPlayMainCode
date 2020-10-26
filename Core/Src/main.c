@@ -68,7 +68,9 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
+
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END 0 */
 
@@ -105,7 +107,7 @@ int main(void)
 
   My_SPI2_INIT(&hspi2);
   /* USER CODE BEGIN 2 */
-
+//  EraseFlash();
 
   /* USER CODE END 2 */
 
@@ -114,9 +116,7 @@ int main(void)
 
 
   buttonPress button = NoPress;
-//  char str[13] = "hello world\r\n";
-//  HAL_UART_Transmit(&huart2, (uint8_t *)str, sizeof(str), 1);
-    //uci_main(&hspi2, &huart2);
+    uci_main(&hspi2, &huart2);
 
 	while (1)
 	{
