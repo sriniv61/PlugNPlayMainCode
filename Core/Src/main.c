@@ -22,6 +22,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_4   /* Start @ of user Flash area */
+#define FLASH_USER_END_ADDR     ADDR_FLASH_SECTOR_11  +  GetSectorSize(ADDR_FLASH_SECTOR_11) -1
+static uint32_t GetSector(uint32_t Address);
+static uint32_t GetSectorSize(uint32_t Sector);
 
 /* USER CODE END Includes */
 
@@ -104,15 +108,34 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
-
   My_SPI2_INIT(&hspi2);
   /* USER CODE BEGIN 2 */
+
 //  EraseFlash();
+
+//  int Address = FLASH_USER_START_ADDR;
+//  uint64_t data32 = 0;
+//
+//  while (Address < FLASH_USER_END_ADDR)
+//  {
+//    data32 = *(__IO uint64_t*)Address;
+//
+//    Address = Address + 4;
+//  }
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int Address = FLASH_USER_START_ADDR;
+
+  while (Address < FLASH_USER_END_ADDR)
+  {
+    uint64_t data32 = *(__IO uint64_t*)Address;
+
+    Address = Address + 8;
+  }
 
 
   buttonPress button = NoPress;
@@ -389,6 +412,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
+}
+
+static uint32_t GetSectorSize(uint32_t Sector)
+{
+uint32_t sectorsize = 0x00;
+
+if((Sector == FLASH_SECTOR_0) || (Sector == FLASH_SECTOR_1) || (Sector == FLASH_SECTOR_2) || (Sector == FLASH_SECTOR_3))
+{
+  sectorsize = 16 * 1024;
+}
+else if(Sector == FLASH_SECTOR_4)
+{
+  sectorsize = 64 * 1024;
+}
+else
+{
+  sectorsize = 128 * 1024;
+}
+return sectorsize;
 }
 
 /* USER CODE BEGIN 4 */

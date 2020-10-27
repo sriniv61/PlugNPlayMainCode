@@ -38,8 +38,12 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	Move *currentMove = malloc(sizeof(Move));
 
 	board_print(&board, huart2, cursorPos);
+
+	int i = 0;
+	buttonPress test[4] = {UPress, APress, UPress, APress};
 	while (winner == RESET) {
-		userInput = getButtonPress(hspi2, 0);
+		userInput = test[i++];
+//		userInput = getButtonPress(hspi2, 0);
 		switch (userInput) {
 		case APress:
 			switch (state) {

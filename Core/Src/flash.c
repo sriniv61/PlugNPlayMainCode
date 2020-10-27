@@ -7,7 +7,7 @@
 
 #include "flash.h"
 
-#define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_2   /* Start @ of user Flash area */
+#define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_4   /* Start @ of user Flash area */
 #define FLASH_USER_END_ADDR     ADDR_FLASH_SECTOR_11  +  GetSectorSize(ADDR_FLASH_SECTOR_11) -1 /* End @ of user Flash area : sector start address + sector size -1 */
 
 #define DATA_32                 ((uint32_t)0x87654321)
@@ -143,45 +143,27 @@ void EraseFlash() {
 	  /* Program the user Flash area word by word
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
 
-	  Address = FLASH_USER_START_ADDR;
-
-	  while (Address < FLASH_USER_END_ADDR)
-	  {
-	    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, DATA_32) == HAL_OK)
-	    {
-	      Address = Address + 4;
-	    }
-	    else
-	    {
-	      /* Error occurred while writing data in Flash memory.
-	         User can add here some code to deal with this error */
-	      while (1)
-	      {
-	      }
-	    }
-	  }
+//	  Address = FLASH_USER_START_ADDR;
+//
+//	  while (Address < FLASH_USER_END_ADDR)
+//	  {
+//	    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, DATA_32) == HAL_OK)
+//	    {
+//	      Address = Address + 4;
+//	    }
+//	    else
+//	    {
+//	      /* Error occurred while writing data in Flash memory.
+//	         User can add here some code to deal with this error */
+//	      while (1)
+//	      {
+//	      }
+//	    }
+//	  }
 
 	  /* Lock the Flash to disable the flash control register access (recommended
 	     to protect the FLASH memory against possible unwanted operation) *********/
 	  HAL_FLASH_Lock();
-
-	  /* Check if the programmed data is OK
-	      MemoryProgramStatus = 0: data programmed correctly
-	      MemoryProgramStatus != 0: number of words not programmed correctly ******/
-	  Address = FLASH_USER_START_ADDR;
-	  MemoryProgramStatus = 0;
-
-	  while (Address < FLASH_USER_END_ADDR)
-	  {
-	    data32 = *(__IO uint32_t*)Address;
-
-	    if (data32 != DATA_32)
-	    {
-	      MemoryProgramStatus++;
-	    }
-
-	    Address = Address + 4;
-	  }
 }
 
 uint64_t readFlash(int index) {
