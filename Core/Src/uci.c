@@ -39,10 +39,11 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 
 	board_print(&board, huart2, cursorPos);
 
-	int i = 0;
-	buttonPress test[4] = {UPress, APress, UPress, APress};
+	int pressNum = 0;
+	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
 	while (winner == RESET) {
-		userInput = test[i++];
+		userInput = test[pressNum];
+		pressNum = pressNum + 1;
 //		userInput = getButtonPress(hspi2, 0);
 		switch (userInput) {
 		case APress:
