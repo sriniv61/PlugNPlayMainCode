@@ -39,7 +39,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	Move *currentMove = malloc(sizeof(Move));
 
 	board_print(&board, huart2, cursorPos);
-	char feedback[50] = {0};
+	char feedback[66] = {0};
 
 //	int pressNum = 0;
 //	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
@@ -185,10 +185,20 @@ jumpBack:
 				board_print(&board, huart2, cursorPos);
 			}
 			// User wants to resign
-			else if (board.color)
+			else if (board.color){
+				//resign text
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Black resigns\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				winner = 0;
-			else
+			}
+			else {
+				//resign text
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "White resigns\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				winner = 1;
+			}
 			break;
 		case StPress:
 			if(state == waitingForThird) {
@@ -209,6 +219,46 @@ jumpBack:
 				board_print(&board, huart2, cursorPos);
 			}
 			// User wants to offer draw
+			else if (board.color){
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Black offers draw\r\nSELECT: ACCEPT\r\nSTART: DECLINE\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				userInput = getButtonPress(hspi2, WHITE);
+			    while(userInput != SePress && userInput != StPress) {
+					userInput = getButtonPress(hspi2, WHITE);
+			    }
+			    if(userInput == SePress) {
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "White accepts draw\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				    winner = 2;
+			    }
+			    else {
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "White declines draw\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			    }
+			}
+			else {
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "White offers draw\r\nSELECT: ACCEPT\r\nSTART: DECLINE\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				userInput = getButtonPress(hspi2, BLACK);
+			    while(userInput != SePress && userInput != StPress) {
+					userInput = getButtonPress(hspi2, BLACK);
+			    }
+			    if(userInput == SePress) {
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "Black accepts draw\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				    winner = 2;
+			    }
+			    else {
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "Black declines draw\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			    }
+			}
 			break;
 		case UPress:
 			if (cursorPos <= 55)
@@ -234,11 +284,27 @@ jumpBack:
 			break;
 		}
 	}
-	if (winner) {
-		//display winner text on screen
+	if(winner == 2) {
+		//display draw text on screen
+		memset(feedback, 0, sizeof(feedback));
+		strcpy(feedback, "Draw\r\n");
+	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 		//return to main menu
-	} else {
+	}
+	else if (winner == 1) {
 		//display winner text on screen
+		memset(feedback, 0, sizeof(feedback));
+		strcpy(feedback, "Black wins\r\n");
+	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+	    HAL_Delay(1000);
+		//return to main menu
+	}
+	else {
+		//display winner text on screen
+		memset(feedback, 0, sizeof(feedback));
+		strcpy(feedback, "White wins\r\n");
+	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+	    HAL_Delay(1000);
 		//return to main menu
 	}
 }
