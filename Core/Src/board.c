@@ -219,6 +219,7 @@ void board_set(Board *board, int sq, int piece) {
 void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos) {
 	char * creturn = "\r";
 	char * newline = "\n";
+	char * space = " ";
     for (int rank = 7; rank >= 0; rank--) {
         for (int file = 0; file < 8; file++) {
             char c[1] = ".";
@@ -241,14 +242,15 @@ void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos) {
                 }
         	}
             HAL_UART_Transmit(huart2, (uint8_t *)(c), sizeof(c), 1);
+            HAL_UART_Transmit(huart2, (uint8_t *)(space), sizeof(space), 1);
 //            putchar(c);
         }
         HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
-        HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(newline), 1);
+        HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(creturn), 1);
 //        putchar('\n');
     }
     HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
-    HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(newline), 1);
+    HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(creturn), 1);
 //    putchar('\n');
 }
 

@@ -21,6 +21,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int cursorPos = 0;
 	buttonPress userInput = APress;
 	gameState state = waitingForFirst;
+	int validPress = 0;
 
 	int source = RESET;
 	int destination = RESET;
@@ -38,13 +39,17 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	Move *currentMove = malloc(sizeof(Move));
 
 	board_print(&board, huart2, cursorPos);
+	char feedback[50] = {0};
 
-	int pressNum = 0;
-	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
+//	int pressNum = 0;
+//	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
 	while (winner == RESET) {
-		userInput = test[pressNum];
-		pressNum = pressNum + 1;
-//		userInput = getButtonPress(hspi2, 0);
+//		userInput = test[pressNum];
+//		pressNum = pressNum + 1;
+jumpBack:
+		userInput = getButtonPress(hspi2, board.color);
+		if((state == waitingForThird) && ((userInput != SePress) && (userInput != StPress) && (userInput != BPress)))
+				goto jumpBack;
 		switch (userInput) {
 		case APress:
 			switch (state) {
@@ -61,9 +66,14 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 				if (numhighlightedDests == 0) {
 					// Jump to error state
 					// Tell user their selection was invalid
-					printf("Invalid selection made, try again.\n");
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "Invalid piece selection made, try again.\r\n");
+		            HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 					break;
 				}
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Piece selected\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				state = waitingForSecond;
 				// display highlighted squares
 				break;
@@ -75,12 +85,17 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 						break;
 				}
 				if (index == numhighlightedDests) {
-					printf("Invalid selection made, try again\n");
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "Invalid destination selection made, try again.\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				}
 				// it's already being checked for a valid move, can simply check the piece and destination
 				else if (PIECE(board.squares[source]) == PAWN
 						&& ((destination < 8) || (destination > 55))) {
 					//promotion
+					memset(feedback, 0, sizeof(feedback));
+					strcpy(feedback, "SELECT: QUEEN\r\nSTART: KNIGHT\r\n");
+				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 					state = waitingForThird;
 				} else {
 					// make the desired move
@@ -104,31 +119,10 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 					board_print(&board, huart2, cursorPos);
 				}
 				break;
-				// Hanlding pawn promotions
-			case waitingForThird:
-				// For pawn promotions Knight = 2, Bishop = 3, Rook = 4, Queen = 5
-				promotion = (unsigned char) userInput;
-
-				// make the desired move
-				// create a new move node (passing through the inputs and the current node)
-				// Execute the new move on the actual board
-				// Saving the move into currentMove
-				currentMove->src = source;
-				currentMove->dst = destination;
-				currentMove->promotion = promotion;
-				make_move(&board, currentMove);
-				// Reset selectedPiece, source, destination, and promotion to -1
-				source = destination = promotion = RESET;
-				// Then free the valid move list
-				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
-				state = checking;
-				board_print(&board, huart2, cursorPos);
-				break;
-
 			default:
-				printf(
-						"invalid state or jumped into checking state too early\n");
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Please select a promotion option.\r\nSELECT: QUEEN\r\nSTART: KNIGHT\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 			}
 			// After every move these things will be checked
 			if (state == checking) {
@@ -158,29 +152,62 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 			break;
 		case BPress:
 			// If the first selection has already been recieved, then we'll respond to this request
-			if (state == waitingForSecond) {
+			if (state == waitingForSecond || state == waitingForThird) {
 				// Reset source and selectedPiece to -1
 				source = RESET;
 				// Then free the valid move list
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Move canceled\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				// Reverting the game state
 				state = waitingForFirst;
-			} else if (state == waitingForThird) {
-				// reset destination
-				destination = RESET;
-				// Reverting the game state
-				state = waitingForSecond;
 			}
 			break;
 		case SePress:
+			if(state == waitingForThird) {
+				// make the desired move
+				// create a new move node (passing through the inputs and the current node)
+				// Execute the new move on the actual board
+				// Saving the move into currentMove
+				currentMove->src = source;
+				currentMove->dst = destination;
+				currentMove->promotion = QUEEN;
+				make_move(&board, currentMove);
+				// Reset selectedPiece, source, destination, and promotion to -1
+				source = destination = RESET;
+				// Then free the valid move list
+				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
+				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+				state = checking;
+				board_print(&board, huart2, cursorPos);
+			}
 			// User wants to resign
-			if (board.color)
+			else if (board.color)
 				winner = 0;
 			else
 				winner = 1;
 			break;
 		case StPress:
+			if(state == waitingForThird) {
+				// make the desired move
+				// create a new move node (passing through the inputs and the current node)
+				// Execute the new move on the actual board
+				// Saving the move into currentMove
+				currentMove->src = source;
+				currentMove->dst = destination;
+				currentMove->promotion = KNIGHT;
+				make_move(&board, currentMove);
+				// Reset selectedPiece, source, destination, and promotion to -1
+				source = destination = RESET;
+				// Then free the valid move list
+				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
+				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+				state = checking;
+				board_print(&board, huart2, cursorPos);
+			}
 			// User wants to offer draw
 			break;
 		case UPress:
