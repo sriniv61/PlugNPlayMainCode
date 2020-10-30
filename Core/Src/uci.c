@@ -14,6 +14,9 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
     bb_init();
 //    return;
 	Board board;
+	actualUndo moveList[MAX_MOVES];
+	memset(moveList, 0, sizeof(moveList));
+	int curMoveNum = 0;
 	setbuf(stdout, NULL);
 	board_reset(&board);
 
@@ -21,7 +24,6 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int cursorPos = 0;
 	buttonPress userInput = APress;
 	gameState state = waitingForFirst;
-	int validPress = 0;
 
 	int source = RESET;
 	int destination = RESET;
@@ -36,7 +38,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int numhighlightedDests = 0;
 	memset(highlightedDests, -1, sizeof(int) * MAX_MOVES);
 
-	Move *currentMove = malloc(sizeof(Move));
+//	Move *currentMove = malloc(sizeof(Move));
 
 	board_print(&board, huart2, cursorPos);
 	char feedback[66] = {0};
@@ -102,10 +104,12 @@ jumpBack:
 					// create a new move node (passing through the inputs and the current node)
 					// Execute the new move on the actual board
 					// Saving the move into currentMove
-					currentMove->src = source;
-					currentMove->dst = destination;
-					currentMove->promotion = EMPTY;
-					make_move(&board, currentMove);
+					moveList[curMoveNum].move.src = source;
+					moveList[curMoveNum].move.dst = destination;
+					moveList[curMoveNum].move.promotion = EMPTY;
+					do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
+					curMoveNum++;
+
 					// Reset selectedPiece, source, destination, and promotion to -1
 					source = destination = promotion = RESET;
 					// Then free the valid move list
@@ -152,7 +156,19 @@ jumpBack:
 			break;
 		case BPress:
 			// If the first selection has already been recieved, then we'll respond to this request
-			if (state == waitingForSecond || state == waitingForThird) {
+			if(state == waitingForFirst && curMoveNum > 0) {
+				curMoveNum--;
+				undo_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Takeback move\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			}
+			else if(state == waitingForFirst && curMoveNum == 0){
+				memset(feedback, 0, sizeof(feedback));
+				strcpy(feedback, "Cannot takeback first move\r\n");
+			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			}
+			else if (state == waitingForSecond || state == waitingForThird) {
 				// Reset source and selectedPiece to -1
 				source = RESET;
 				// Then free the valid move list
@@ -172,10 +188,11 @@ jumpBack:
 				// create a new move node (passing through the inputs and the current node)
 				// Execute the new move on the actual board
 				// Saving the move into currentMove
-				currentMove->src = source;
-				currentMove->dst = destination;
-				currentMove->promotion = QUEEN;
-				make_move(&board, currentMove);
+				moveList[curMoveNum].move.src = source;
+				moveList[curMoveNum].move.dst = destination;
+				moveList[curMoveNum].move.promotion = QUEEN;
+				do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
+				curMoveNum++;
 				// Reset selectedPiece, source, destination, and promotion to -1
 				source = destination = RESET;
 				// Then free the valid move list
@@ -206,10 +223,11 @@ jumpBack:
 				// create a new move node (passing through the inputs and the current node)
 				// Execute the new move on the actual board
 				// Saving the move into currentMove
-				currentMove->src = source;
-				currentMove->dst = destination;
-				currentMove->promotion = KNIGHT;
-				make_move(&board, currentMove);
+				moveList[curMoveNum].move.src = source;
+				moveList[curMoveNum].move.dst = destination;
+				moveList[curMoveNum].move.promotion = KNIGHT;
+				do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
+				curMoveNum++;
 				// Reset selectedPiece, source, destination, and promotion to -1
 				source = destination = RESET;
 				// Then free the valid move list
