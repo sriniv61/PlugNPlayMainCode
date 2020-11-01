@@ -39,12 +39,13 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 
 	board_print(&board, huart2, cursorPos);
 	while (winner == RESET) {
-		userInput = getButtonPress(hspi2, 0);
+		//userInput = getButtonPress(hspi2, 0);
 		switch (userInput) {
 		case APress:
 			switch (state) {
 			case waitingForFirst:
-				source = cursorPos;
+				//source = cursorPos;
+				source = 8;
 				numLegalMoves = gen_legal_moves(&board, legalMoves);
 				numhighlightedDests = 0;
 				for (int i = 0; i < numLegalMoves; i++) {
@@ -64,7 +65,8 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 				break;
 
 			case waitingForSecond:
-				destination = cursorPos;
+				//destination = cursorPos;
+				destination = 16;
 				for (index = 0; index < numhighlightedDests; index++) {
 					if (destination == highlightedDests[index])
 						break;

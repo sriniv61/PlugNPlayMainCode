@@ -107,7 +107,7 @@ int main(void)
 
   My_SPI2_INIT(&hspi2);
   /* USER CODE BEGIN 2 */
-//  EraseFlash();
+  EraseFlash();
 
   /* USER CODE END 2 */
 

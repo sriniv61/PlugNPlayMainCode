@@ -144,8 +144,9 @@ void EraseFlash() {
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
 
 	  Address = FLASH_USER_START_ADDR;
+	  int endAddr = Address + 4;
 
-	  while (Address < FLASH_USER_END_ADDR)
+	  while (Address < endAddr)
 	  {
 	    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, DATA_32) == HAL_OK)
 	    {
@@ -171,7 +172,7 @@ void EraseFlash() {
 	  Address = FLASH_USER_START_ADDR;
 	  MemoryProgramStatus = 0;
 
-	  while (Address < FLASH_USER_END_ADDR)
+	  while (Address < endAddr)
 	  {
 	    data32 = *(__IO uint32_t*)Address;
 
