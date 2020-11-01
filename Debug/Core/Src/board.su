@@ -1,5 +1,0 @@
-board.c:5:6:board_clear	16	static
-board.c:10:6:board_reset	24	static
-board.c:34:6:board_set	56	static
-board.c:219:6:board_print	48	static
-board.c:255:6:board_load_fen	64	static
