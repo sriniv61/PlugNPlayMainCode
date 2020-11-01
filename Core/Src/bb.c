@@ -225,6 +225,7 @@ void bb_init() {
     }
 
     // ATTACK_ROOK
+<<<<<<< HEAD
         offset = 0;
         for (int sq = 0; sq < 64; sq++) {
             int count = bb_squares(BB_ROOK_6[sq], squares);
@@ -249,6 +250,13 @@ void bb_init() {
             OFFSET_ROOK[sq] = offset;
             offset += 1 << (64 - SHIFT_ROOK[sq]);
         }
+=======
+    offset = 0;
+    for (int sq = 0; sq < 64; sq++) {
+        OFFSET_ROOK[sq] = offset;
+        offset += 1 << (64 - SHIFT_ROOK[sq]);
+    }
+>>>>>>> 7ad947ba39ca2c8fcf498b59d6876eba686f3f14
 
     // HASH
     HASH_COLOR = bb_random();

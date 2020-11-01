@@ -3,7 +3,7 @@
 
 #include "stm32f4xx_hal.h"
 
-#define FLASH_USER_START_ADDR     ((uint32_t)0x08008000) /* Base @ of Sector 2, 16 Kbytes */
+#define FLASH_USER_START_ADDR     ((uint32_t)0x08010000) /* Base @ of Sector 2, 16 Kbytes */
 
 #define BIT(sq) (1LL << (sq))
 #define RF(rank, file) ((rank) * 8 + (file))

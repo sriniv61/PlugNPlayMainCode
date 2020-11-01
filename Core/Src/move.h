@@ -19,6 +19,11 @@ typedef struct {
     bb ep;
 } Undo;
 
+typedef struct {
+	Move move;
+	Undo undo;
+} actualUndo;
+
 void make_move(Board *board, Move *move);
 void do_null_move(Board *board, Undo *undo);
 void undo_null_move(Board *board, Undo *undo);
