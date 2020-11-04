@@ -42,6 +42,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+volatile int numLinesCompleted = 0;
 
 /* USER CODE END PV */
 
@@ -204,11 +205,19 @@ void SysTick_Handler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-
+	int timsr = TIM3 -> SR;
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-
+	//Store and clear
+	if ((timsr & TIM_SR_CC1IF) == TIM_SR_CC1IF)
+	{
+		TIM1 -> CCR1 = 0;
+	}
+	else
+	{
+		TIM1 -> CCR1 = 3;
+	}
   /* USER CODE END TIM3_IRQn 1 */
 }
 

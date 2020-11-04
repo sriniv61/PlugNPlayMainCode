@@ -225,38 +225,11 @@ void bb_init() {
     }
 
     // ATTACK_ROOK
-<<<<<<< HEAD
-        offset = 0;
-        for (int sq = 0; sq < 64; sq++) {
-            int count = bb_squares(BB_ROOK_6[sq], squares);
-            int n = 1 << count;
-            for (int i = 0; i < n; i++) {
-                bb obstacles = 0;
-                for (int j = 0; j < count; j++) {
-                    if (i & (1 << j)) {
-                        obstacles |= BIT(squares[j]);
-                    }
-                }
-                bb value = bb_slide_rook(sq, 0, obstacles);
-                int index = (obstacles * MAGIC_ROOK[sq]) >> SHIFT_ROOK[sq];
-                bb previous = attack_rook_read(offset + index);
-    //            bb previous = ATTACK_ROOK[offset + index];
-                if (previous && previous != value) {
-                    printf("ERROR: invalid ATTACK_ROOK table\n");
-                }
-                attack_rook_write(offset + index, value);
-    //            ATTACK_ROOK[offset + index] = value;
-            }
-            OFFSET_ROOK[sq] = offset;
-            offset += 1 << (64 - SHIFT_ROOK[sq]);
-        }
-=======
     offset = 0;
     for (int sq = 0; sq < 64; sq++) {
         OFFSET_ROOK[sq] = offset;
         offset += 1 << (64 - SHIFT_ROOK[sq]);
     }
->>>>>>> 7ad947ba39ca2c8fcf498b59d6876eba686f3f14
 
     // HASH
     HASH_COLOR = bb_random();

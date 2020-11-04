@@ -32,7 +32,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "../Src/buttons.h"
+#include "../Src/uci.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
