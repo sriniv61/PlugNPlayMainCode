@@ -7,6 +7,7 @@
 #include "util.h"
 #include "gen.h"
 #include "main.h"
+#include "buffer_funcs.h"
 
 #define RESET -1
 

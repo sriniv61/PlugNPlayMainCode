@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include "bb.h"
-#include "main.h"
+#include "buffer_funcs.h"
 
 #define WHITE 0x00
 #define BLACK 0x10

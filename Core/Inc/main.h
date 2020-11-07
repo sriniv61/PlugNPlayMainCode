@@ -35,6 +35,7 @@ extern "C" {
 #include "../Src/buttons.h"
 #include "../Src/uci.h"
 #include "../Src/vga.h"
+#include "../Src/buffer_funcs.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

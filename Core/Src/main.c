@@ -143,27 +143,39 @@ int main(void)
 	initDMA0();
 	initTIM1prep(199);
 
-	uint8_t color = 0x00;
-	for(;;)
-	    {
-	        if (drawNewFrame)
-	        {
-	            drawNewFrame = 0;
-	            color += 1;
-	            if (color > 63)
-	            {
-	                color = 0;
-	            }
-	            for (int i = 0; i < VGA_H_PX; i++)
-	            {
-	                for (int j = 0; j < VGA_W_PX; j++)
-	                {
-	                    framebuffer[i][j] = color;
-	                }
-	            }
-	        }
-	        HAL_Delay(1000);
-	    }
+	//gray light square = 0b101010
+	//green dark square = 0b011100
+	//white piece = 0b111111
+	//black piece = 0b000000
+//	uint8_t color = 0b101010;
+//	uint8_t color2 = 0b011000;
+//	update_square(56,0,1,1);
+//	update_square(60,0,0,0);
+//	update_square(63,1,0,1);
+//	for(;;)
+//	    {
+//	        if (drawNewFrame)
+//	        {
+//	            drawNewFrame = 0;
+////	            color += 1;
+////	            if (color > 63)
+////	            {
+////	                color = 0;
+////	            }
+//	            for (int i = 0; i < VGA_H_PX; i++)
+//	            {
+//	                for (int j = 0; j < VGA_W_PX / 2; j++)
+//	                {
+//	                    framebuffer[i][j] = color;
+//	                }
+//	                for (int j = VGA_W_PX / 2; j < VGA_W_PX; j++)
+//	                {
+//	                    framebuffer[i][j] = color2;
+//	                }
+//	            }
+//	        }
+//	        HAL_Delay(1000);
+//	    }
 
 //	while(1) {
 //		HAL_Delay(1000);
