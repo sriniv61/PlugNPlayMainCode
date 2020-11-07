@@ -42,7 +42,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-volatile int numLinesCompleted = 0;
 
 /* USER CODE END PV */
 
@@ -202,34 +201,58 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles TIM3 global interrupt.
   */
-void TIM3_IRQHandler(void)
+
+void TIM3_IRQHandler()
 {
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-	int timsr = TIM3 -> SR;
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
-	//Store and clear
-	if ((timsr & TIM_SR_CC1IF) == TIM_SR_CC1IF)
-	{
-		TIM1 -> CCR1 = 0;
-	}
-	else
-	{
-		TIM1 -> CCR1 = 3;
-	}
-  /* USER CODE END TIM3_IRQn 1 */
+    TIM3 -> SR &= ~(TIM_SR_CC1IF);
+    drawNewFrame = 1;
 }
 
 /**
   * @brief This function handles DMA2 stream1 global interrupt.
   */
+int framebufferLoop = 0;
+int drawnLines = 0;
+int nextFramebufferLine;
+int nextBuffer = 1;
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
 
+	//Clear the interrupt
+	DMA2 -> LIFCR |= 0b111101000000;
+	//Flip next buffer
+	nextBuffer ^= 1;
+
+	drawnLines += 1;	//How many VGA timing lines are sent
+	framebufferLoop += 1;	//How many iterations through each framebuffer line
+	if (framebufferLoop == 4)
+	{
+		framebufferLoop = 0;
+		nextFramebufferLine += 1;	//After 4 loops, go to next line
+	}
+	if (nextFramebufferLine > 149)	//Only use up to 150th row (blank)
+	{
+		nextFramebufferLine = 150;
+	}
+
+	if (drawnLines == 628)
+	{
+		nextFramebufferLine = 0;
+		drawnLines = 0;
+		framebufferLoop = 0;
+	}
+
+	if (nextBuffer == 0)
+	{
+		DMA2_Stream1 -> M0AR = (uint32_t) framebuffer[nextFramebufferLine];
+	}
+	else
+	{
+		DMA2_Stream1 -> M1AR = (uint32_t) framebuffer[nextFramebufferLine];
+	}
   /* USER CODE END DMA2_Stream1_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim1_ch1);
+//  HAL_DMA_IRQHandler(&hdma_tim1_ch1);
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
   /* USER CODE END DMA2_Stream1_IRQn 1 */

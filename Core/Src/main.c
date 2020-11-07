@@ -77,7 +77,6 @@ static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -113,17 +112,71 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
+//  MX_DMA_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
+//  MX_TIM1_Init();
+//  MX_TIM2_Init();
+//  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+	//Configure the framebuffer with interesting infromation
+	for (int i = 0; i < VGA_H_PX; i++){
+		for (int j = 0; j < VGA_W_PX; j++){
+			framebuffer[i][j] = j % 16;
+			if (j == 0)
+				framebuffer[i][j] = 255;
+			else if (j == VGA_W_PX - 1)
+				framebuffer[i][j] = 255;
+		}
+		framebuffer[i][VGA_W_PX] = 0;
+		framebuffer[i][1] = 16;
+	}
+
+	for (int i = 0; i < VGA_W_PX; i++)
+	{
+		framebuffer[73][i] = 0b00110000;
+	}
+
+	//NORMAL PROCEDURE
+	initGPIO();
+	initDMA0();
+	initTIM1prep(199);
+
+	uint8_t color = 0x00;
+	for(;;)
+	    {
+	        if (drawNewFrame)
+	        {
+	            drawNewFrame = 0;
+	            color += 1;
+	            if (color > 63)
+	            {
+	                color = 0;
+	            }
+	            for (int i = 0; i < VGA_H_PX; i++)
+	            {
+	                for (int j = 0; j < VGA_W_PX; j++)
+	                {
+	                    framebuffer[i][j] = color;
+	                }
+	            }
+	        }
+	        HAL_Delay(1000);
+	    }
+
+//	while(1) {
+//		HAL_Delay(1000);
+//		framebuffer[73][VGA_W_PX / 2] = 0b11111111;
+//		HAL_Delay(1000);
+//		framebuffer[73][VGA_W_PX / 2] = 0b00000000;
+//	}
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  My_SPI2_INIT(&hspi2);
   // Remember to START timer 2  after timer 3 above
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_Base_Start(&htim2);
@@ -158,7 +211,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 5;
-  RCC_OscInitStruct.PLL.PLLN = 199;
+  RCC_OscInitStruct.PLL.PLLN = 200;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -512,7 +565,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15
-                          |GPIO_PIN_4, GPIO_PIN_RESET);
+                          |GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PE3 Controller_SELECT_Pin PE10 PE11
                            PE14 PE15 */
@@ -575,9 +629,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PD12 PD13 PD14 PD15
-                           PD4 */
+                           PD0 PD1 PD2 PD3
+                           PD4 PD5 PD6 PD7 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15
-                          |GPIO_PIN_4;
+                          |GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -604,12 +660,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PD5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB6 PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_9;
