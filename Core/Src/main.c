@@ -123,66 +123,14 @@ int main(void)
 	//Configure the framebuffer with interesting infromation
 	for (int i = 0; i < VGA_H_PX; i++){
 		for (int j = 0; j < VGA_W_PX; j++){
-			framebuffer[i][j] = j % 16;
-			if (j == 0)
-				framebuffer[i][j] = 255;
-			else if (j == VGA_W_PX - 1)
-				framebuffer[i][j] = 255;
+			framebuffer[i][j] = 0;
 		}
-		framebuffer[i][VGA_W_PX] = 0;
-		framebuffer[i][1] = 16;
-	}
-
-	for (int i = 0; i < VGA_W_PX; i++)
-	{
-		framebuffer[73][i] = 0b00110000;
 	}
 
 	//NORMAL PROCEDURE
 	initGPIO();
 	initDMA0();
 	initTIM1prep(199);
-
-	//gray light square = 0b101010
-	//green dark square = 0b011100
-	//white piece = 0b111111
-	//black piece = 0b000000
-//	uint8_t color = 0b101010;
-//	uint8_t color2 = 0b011000;
-//	update_square(56,0,1,1);
-//	update_square(60,0,0,0);
-//	update_square(63,1,0,1);
-//	for(;;)
-//	    {
-//	        if (drawNewFrame)
-//	        {
-//	            drawNewFrame = 0;
-////	            color += 1;
-////	            if (color > 63)
-////	            {
-////	                color = 0;
-////	            }
-//	            for (int i = 0; i < VGA_H_PX; i++)
-//	            {
-//	                for (int j = 0; j < VGA_W_PX / 2; j++)
-//	                {
-//	                    framebuffer[i][j] = color;
-//	                }
-//	                for (int j = VGA_W_PX / 2; j < VGA_W_PX; j++)
-//	                {
-//	                    framebuffer[i][j] = color2;
-//	                }
-//	            }
-//	        }
-//	        HAL_Delay(1000);
-//	    }
-
-//	while(1) {
-//		HAL_Delay(1000);
-//		framebuffer[73][VGA_W_PX / 2] = 0b11111111;
-//		HAL_Delay(1000);
-//		framebuffer[73][VGA_W_PX / 2] = 0b00000000;
-//	}
 
   /* USER CODE END 2 */
 

@@ -222,10 +222,37 @@ void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos) {
 	char * space = " ";
     for (int rank = 7; rank >= 0; rank--) {
         for (int file = 0; file < 8; file++) {
-			int piece = board->squares[RF(rank, file)];
-			update_square(RF(rank,file), PIECE(piece), COLOR(piece), cursorPos == RF(rank,file), 0);
-		}
-	}
+            char c[1] = ".";
+        	if(cursorPos == RF(rank,file)) {
+        		c[0] = 'c';
+        	}
+        	else {
+                int piece = board->squares[RF(rank, file)];
+//                update_square(RF(rank,file), PIECE(piece), COLOR(piece), cursorPos == RF(rank,file), 0);
+                switch (PIECE(piece)) {
+                    case EMPTY:  c[0] = '.'; break;
+                    case PAWN:   c[0] = 'P'; break;
+                    case KNIGHT: c[0] = 'N'; break;
+                    case BISHOP: c[0] = 'B'; break;
+                    case ROOK:   c[0] = 'R'; break;
+                    case QUEEN:  c[0] = 'Q'; break;
+                    case KING:   c[0] = 'K'; break;
+                };
+                if (COLOR(piece)) {
+                    c[0] |= 0x20;
+                }
+        	}
+            HAL_UART_Transmit(huart2, (uint8_t *)(c), sizeof(c), 1);
+            HAL_UART_Transmit(huart2, (uint8_t *)(space), sizeof(space), 1);
+//            putchar(c);
+        }
+        HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
+        HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(creturn), 1);
+//        putchar('\n');
+    }
+    HAL_UART_Transmit(huart2, (uint8_t *)(newline), sizeof(newline), 1);
+    HAL_UART_Transmit(huart2, (uint8_t *)(creturn), sizeof(creturn), 1);
+//    putchar('\n');
 }
 
 void board_load_fen(Board *board, char *fen) {
