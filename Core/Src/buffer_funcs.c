@@ -13,25 +13,16 @@
 //position: tile to update
 //piece: type of piece
 //pieceColor: 0=white,1=black
-void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor)
+void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective)
 {
 	//Find x and y position
-	int x = BOARD_UPPER_LEFT_X + 18 * (position % 8);
-	int y = BOARD_UPPER_LEFT_Y + 18 * ((int) (63 - position) / 8);
-
-//	Get pointer to sample
-//	uint8_t ** pointer;
-//	switch (piece)
-//	{
-//		case 0: //pawn
-//			pointer = (uint8_t**)pawn;
-//			break;
-//	}
+	int x = perspective ?  : BOARD_UPPER_LEFT_X + 18 * (position % 8);
+	int y = perspective ?  : BOARD_UPPER_LEFT_Y + 18 * ((int) (63 - position) / 8);
 
 	//Find color of square
 	uint8_t oddRow = (position / 8) % 2;
 	uint8_t squareColor = (oddRow && (position % 2) || !oddRow && !(position % 2)) ? GREEN : GRAY;
-	uint8_t pieceColor = pieceColorBit ? W : B;
+	uint8_t pieceColor = pieceColorBit ? B : W;
 	uint8_t highlightedColor = PURPLE;
 	uint8_t cursorColor = BLUE;
 

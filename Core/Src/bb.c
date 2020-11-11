@@ -259,7 +259,7 @@ void attack_rook_write(int index, bb value) {
 	HAL_FLASH_Unlock();
 	for(int i = 0; i < 8; i++){
 		uint64_t valToWrite = (uint8_t)(value >> (i * 8));
-		uint32_t addr = (uint32_t)(FLASH_USER_START_ADDR + 4 + index * sizeof(long long) + i);
+		uint32_t addr = (uint32_t)(FLASH_USER_START_ADDR + index * sizeof(long long) + i);
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, addr, valToWrite) != HAL_OK) {
 			HAL_FLASH_GetError();
 		}
@@ -272,7 +272,7 @@ void attack_rook_write(int index, bb value) {
 }
 
 bb attack_rook_read(int index) {
-	uint32_t Address = FLASH_USER_START_ADDR + 4 + (index * 8);
+	uint32_t Address = FLASH_USER_START_ADDR + (index * 8);
 	uint64_t data = *(__IO uint64_t*)Address;
 	return data;
 }

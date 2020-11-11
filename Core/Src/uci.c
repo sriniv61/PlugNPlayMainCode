@@ -58,8 +58,8 @@ jumpBack:
 		case APress:
 			switch (state) {
 			case waitingForFirst:
-				//source = cursorPos;
-				source = 8;
+				source = cursorPos;
+//				source = 8;
 				numLegalMoves = gen_legal_moves(&board, legalMoves);
 				numhighlightedDests = 0;
 				for (int i = 0; i < numLegalMoves; i++) {
@@ -84,8 +84,8 @@ jumpBack:
 				break;
 
 			case waitingForSecond:
-				//destination = cursorPos;
-				destination = 16;
+				destination = cursorPos;
+//				destination = 16;
 				for (index = 0; index < numhighlightedDests; index++) {
 					if (destination == highlightedDests[index])
 						break;

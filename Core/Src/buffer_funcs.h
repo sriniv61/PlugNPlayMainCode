@@ -20,6 +20,9 @@
 
 #define BOARD_UPPER_LEFT_X 3
 #define BOARD_UPPER_LEFT_Y 3
+
+#define BOARD_UPPER_LEFT_X 3
+#define BOARD_UPPER_LEFT_Y 3
 #define TILE_WIDTH 18
 #define B 0
 #define W 63
