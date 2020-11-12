@@ -91,7 +91,7 @@ typedef struct {
 void board_clear(Board *board);
 void board_reset(Board *board);
 void board_set(Board *board, int sq, int piece);
-void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos);
+void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos, int * highlightedDests);
 void board_load_fen(Board *board, char *fen);
 
 #endif

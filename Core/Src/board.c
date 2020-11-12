@@ -254,11 +254,19 @@ void board_set(Board *board, int sq, int piece) {
 ////    putchar('\n');
 //}
 
-void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos) {
+void board_print(Board *board, UART_HandleTypeDef * huart2, int cursorPos, int * highlightedDests) {
+	int highlighted = 0;
 	for (int rank = 7; rank >= 0; rank--) {
 		for (int file = 0; file < 8; file++) {
 			int piece = board->squares[RF(rank, file)];
-			update_square(RF(rank,file), PIECE(piece), COLOR(piece), cursorPos == RF(rank,file), 0, board->color);
+			highlighted = 0;
+			for(int i = 0; i < 64; i++) {
+				if(highlightedDests[i] == RF(rank, file)){
+					highlighted = 1;
+					break;
+				}
+			}
+			update_square(RF(rank,file), PIECE(piece), COLOR(piece), highlighted, cursorPos == RF(rank,file), board->color);
 		}
 	}
 }

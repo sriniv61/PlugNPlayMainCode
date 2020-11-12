@@ -35,21 +35,17 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int numLegalMoves = 0;
 	memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 
-	int highlightedDests[MAX_MOVES];
+	int highlightedDests[64];
 	int numhighlightedDests = 0;
-	memset(highlightedDests, -1, sizeof(int) * MAX_MOVES);
+	memset(highlightedDests, -1, sizeof(int) * 64);
 
-//	Move *currentMove = malloc(sizeof(Move));
-
-	board_print(&board, huart2, cursorPos);
-	char feedback[66] = {0};
+	board_print(&board, huart2, cursorPos, highlightedDests);
+	clear_feedback();
 
 //	int pressNum = 0;
 //	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
 	while (winner == RESET) {
-		//userI
-//		userInput = test[pressNum];
-//		pressNum = pressNum + 1;
+		update_options(state);
 jumpBack:
 		userInput = getButtonPress(hspi2, board.color);
 		if((state == waitingForThird) && ((userInput != SePress) && (userInput != StPress) && (userInput != BPress)))
@@ -59,7 +55,6 @@ jumpBack:
 			switch (state) {
 			case waitingForFirst:
 				source = cursorPos;
-//				source = 8;
 				numLegalMoves = gen_legal_moves(&board, legalMoves);
 				numhighlightedDests = 0;
 				for (int i = 0; i < numLegalMoves; i++) {
@@ -71,16 +66,15 @@ jumpBack:
 				if (numhighlightedDests == 0) {
 					// Jump to error state
 					// Tell user their selection was invalid
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "Invalid piece selection made, try again.\r\n");
-		            HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+		            clear_feedback();
+		            update_feedback("INVALID", 7, 0);
+		            update_feedback("PIECE", 5, 1);
 					break;
 				}
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Piece selected\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				state = waitingForSecond;
+				clear_feedback();
 				// display highlighted squares
+				board_print(&board, huart2, cursorPos, highlightedDests);
 				break;
 
 			case waitingForSecond:
@@ -91,18 +85,17 @@ jumpBack:
 						break;
 				}
 				if (index == numhighlightedDests) {
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "Invalid destination selection made, try again.\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+		            clear_feedback();
+		            update_feedback("INVALID", 7, 0);
+		            update_feedback("DESTINATION", 11, 1);
 				}
 				// it's already being checked for a valid move, can simply check the piece and destination
 				else if (PIECE(board.squares[source]) == PAWN
 						&& ((destination < 8) || (destination > 55))) {
-					//promotion
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "SELECT: QUEEN\r\nSTART: KNIGHT\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 					state = waitingForThird;
+		            clear_feedback();
+		            update_feedback("SELECT", 6, 0);
+		            update_feedback("PROMOTION", 9, 1);
 				} else {
 					// make the desired move
 					// create a new move node (passing through the inputs and the current node)
@@ -122,15 +115,14 @@ jumpBack:
 					 printf("src: %d, dest: %d\n", legalMoves[index].src, legalMoves[index].dst);
 					 }*/
 					memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-					memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+					memset(highlightedDests, -1, sizeof(Move) * 64);
 					state = checking;
-					board_print(&board, huart2, cursorPos);
+					clear_feedback();
+					board_print(&board, huart2, cursorPos, highlightedDests);
 				}
 				break;
 			default:
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Please select a promotion option.\r\nSELECT: QUEEN\r\nSTART: KNIGHT\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				break;
 			}
 			// After every move these things will be checked
 			if (state == checking) {
@@ -149,13 +141,11 @@ jumpBack:
 						winner = 2;
 					}
 				}
-				// Checking for 3 fold repitions
-				// winner = checkForRepetition(currentMove);
-				// Looking for ...
 
 				// Resetting state
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 				state = waitingForFirst;
+				clear_feedback();
 			}
 			break;
 		case BPress:
@@ -163,28 +153,28 @@ jumpBack:
 			if(state == waitingForFirst && curMoveNum > 0) {
 				curMoveNum--;
 				undo_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Takeback move\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			    clear_feedback();
+	            update_feedback("LAST MOVE", 9, 0);
+	            update_feedback("TAKEN BACK", 10, 1);
 			}
 			else if(state == waitingForFirst && curMoveNum == 0){
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Cannot takeback first move\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+			    clear_feedback();
+	            update_feedback("CANNOT", 6, 0);
+	            update_feedback("TAKE BACK", 9, 1);
+	            update_feedback("FIRST MOVE", 10, 2);
 			}
 			else if (state == waitingForSecond || state == waitingForThird) {
 				// Reset source and selectedPiece to -1
 				source = RESET;
 				// Then free the valid move list
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
-
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Move canceled\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				memset(highlightedDests, -1, sizeof(Move) * 64);
 				// Reverting the game state
 				state = waitingForFirst;
+				clear_feedback();
+	            update_feedback("MOVE ABORTED", 12, 0);
 			}
+			board_print(&board, huart2, cursorPos, highlightedDests);
 			break;
 		case SePress:
 			if(state == waitingForThird) {
@@ -201,24 +191,23 @@ jumpBack:
 				source = destination = RESET;
 				// Then free the valid move list
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+				memset(highlightedDests, -1, sizeof(Move) * 64);
 				state = checking;
-				board_print(&board, huart2, cursorPos);
+				board_print(&board, huart2, cursorPos, highlightedDests);
+				clear_feedback();
 			}
 			// User wants to resign
 			else if (board.color){
-				//resign text
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Black resigns\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				winner = 0;
+				clear_feedback();
+	            update_feedback("BLACK", 5, 0);
+	            update_feedback("RESIGNS", 7, 1);
 			}
 			else {
-				//resign text
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "White resigns\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				winner = 1;
+				clear_feedback();
+	            update_feedback("WHITE", 5, 0);
+	            update_feedback("RESIGNS", 7, 1);
 			}
 			break;
 		case StPress:
@@ -236,97 +225,124 @@ jumpBack:
 				source = destination = RESET;
 				// Then free the valid move list
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * MAX_MOVES);
+				memset(highlightedDests, -1, sizeof(Move) * 64);
 				state = checking;
-				board_print(&board, huart2, cursorPos);
+				board_print(&board, huart2, cursorPos, highlightedDests);
+				clear_feedback();
 			}
 			// User wants to offer draw
 			else if (board.color){
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "Black offers draw\r\nSELECT: ACCEPT\r\nSTART: DECLINE\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				clear_feedback();
+	            update_feedback("BLACK OFFERS", 12, 0);
+	            update_feedback("DRAW", 4, 1);
+	            update_feedback("SE = ACCEPT", 11, 6);
+	            update_feedback("ST = DECLINE", 12, 7);
 				userInput = getButtonPress(hspi2, WHITE);
 			    while(userInput != SePress && userInput != StPress) {
 					userInput = getButtonPress(hspi2, WHITE);
 			    }
 			    if(userInput == SePress) {
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "White accepts draw\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				    winner = 2;
+		            update_feedback("WHITE", 5, 3);
+		            update_feedback("ACCEPTS", 7, 4);
+		            HAL_Delay(3000);
+		            clear_feedback();
 			    }
 			    else {
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "White declines draw\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+		            update_feedback("WHITE", 5, 3);
+		            update_feedback("DECLINES", 8, 4);
+		            HAL_Delay(2000);
+		            clear_feedback();
 			    }
 			}
 			else {
-				memset(feedback, 0, sizeof(feedback));
-				strcpy(feedback, "White offers draw\r\nSELECT: ACCEPT\r\nSTART: DECLINE\r\n");
-			    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+				clear_feedback();
+	            update_feedback("WHITE OFFERS", 12, 0);
+	            update_feedback("DRAW", 4, 1);
+	            update_feedback("SE = ACCEPT", 11, 6);
+	            update_feedback("ST = DECLINE", 12, 7);
 				userInput = getButtonPress(hspi2, BLACK);
 			    while(userInput != SePress && userInput != StPress) {
 					userInput = getButtonPress(hspi2, BLACK);
 			    }
 			    if(userInput == SePress) {
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "Black accepts draw\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 				    winner = 2;
+		            update_feedback("BLACK", 5, 3);
+		            update_feedback("ACCEPTS", 7, 4);
+		            HAL_Delay(3000);
+					clear_feedback();
+					//print draw
 			    }
 			    else {
-					memset(feedback, 0, sizeof(feedback));
-					strcpy(feedback, "Black declines draw\r\n");
-				    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
+		            update_feedback("BLACK", 5, 3);
+		            update_feedback("DECLINES", 8, 4);
+		            HAL_Delay(2000);
+					clear_feedback();
+					//black declines draw
 			    }
 			}
 			break;
 		case UPress:
-			if (cursorPos <= 55)
-				cursorPos += 8;
-			board_print(&board, huart2, cursorPos);
+			if(board.color == WHITE) {
+				if (cursorPos <= 55)
+					cursorPos += 8;
+			}
+			else {
+				if (cursorPos >= 8)
+					cursorPos -= 8;
+			}
+			board_print(&board, huart2, cursorPos, highlightedDests);
 			break;
 		case DPress:
-			if (cursorPos >= 8)
-				cursorPos -= 8;
-			board_print(&board, huart2, cursorPos);
+			if(board.color == WHITE) {
+				if (cursorPos >= 8)
+					cursorPos -= 8;
+			}
+			else {
+				if (cursorPos <= 55)
+					cursorPos += 8;
+			}
+			board_print(&board, huart2, cursorPos, highlightedDests);
 			break;
 		case LPress:
-			if (cursorPos % 8 != 0)
-				cursorPos--;
-			board_print(&board, huart2, cursorPos);
+			if(board.color == WHITE) {
+				if (cursorPos % 8 != 0)
+					cursorPos--;
+			}
+			else {
+				if (cursorPos % 8 != 7)
+					cursorPos++;
+			}
+			board_print(&board, huart2, cursorPos, highlightedDests);
 			break;
 		case RPress:
-			if (cursorPos % 8 != 7)
-				cursorPos++;
-			board_print(&board, huart2, cursorPos);
+			if(board.color == WHITE) {
+				if (cursorPos % 8 != 7)
+					cursorPos++;
+			}
+			else {
+				if (cursorPos % 8 != 0)
+					cursorPos--;
+			}
+			board_print(&board, huart2, cursorPos, highlightedDests);
 			break;
 		case NoPress:
 			break;
 		}
 	}
 	if(winner == 2) {
-		//display draw text on screen
-		memset(feedback, 0, sizeof(feedback));
-		strcpy(feedback, "Draw\r\n");
-	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
 		//return to main menu
 	}
 	else if (winner == 1) {
-		//display winner text on screen
-		memset(feedback, 0, sizeof(feedback));
-		strcpy(feedback, "Black wins\r\n");
-	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
-	    HAL_Delay(1000);
+		clear_feedback();
+        update_feedback("BLACK WINS", 10, 4);
+        HAL_Delay(5000);
 		//return to main menu
 	}
 	else {
-		//display winner text on screen
-		memset(feedback, 0, sizeof(feedback));
-		strcpy(feedback, "White wins\r\n");
-	    HAL_UART_Transmit(huart2, (uint8_t *)(feedback), sizeof(feedback), HAL_MAX_DELAY);
-	    HAL_Delay(1000);
+		clear_feedback();
+        update_feedback("WHITE WINS", 10, 4);
+        HAL_Delay(5000);
 		//return to main menu
 	}
 }
