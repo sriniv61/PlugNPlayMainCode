@@ -140,6 +140,9 @@ void Error_Handler(void);
 #define MEMS_INT2_GPIO_Port GPIOE
 
 volatile int drawNewFrame;
+volatile int wavetable[1000];
+volatile int audio_flag; //0 = nothing, 1 = place piece, 2 = error, 3 = check, 4 = capture, 5 = win
+DAC_HandleTypeDef hdac;
 
 /* USER CODE END Private defines */
 

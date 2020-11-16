@@ -11,6 +11,15 @@
 
 #define RESET -1
 
+//void audio_out(){
+//	audio_flag = 1;
+//	TIM6->DIER |= TIM_DIER_UIE;
+//	TIM6->CR1 |= TIM_CR1_CEN;
+//	audio_flag = 0;
+//	TIM6->DIER &= ~TIM_DIER_UIE;
+//	TIM6->CR1 &= ~TIM_CR1_CEN;
+//}
+
 void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
     bb_init();
 //    return;
@@ -39,6 +48,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	int numhighlightedDests = 0;
 	memset(highlightedDests, -1, sizeof(int) * 64);
 
+	int next_audio_flag = 0;
 	board_print(&board, huart2, cursorPos, highlightedDests);
 	clear_feedback();
 
@@ -88,6 +98,7 @@ jumpBack:
 		            clear_feedback();
 		            update_feedback("INVALID", 7, 0);
 		            update_feedback("DESTINATION", 11, 1);
+		            next_audio_flag = 2;
 				}
 				// it's already being checked for a valid move, can simply check the piece and destination
 				else if (PIECE(board.squares[source]) == PAWN
@@ -104,6 +115,12 @@ jumpBack:
 					moveList[curMoveNum].move.src = source;
 					moveList[curMoveNum].move.dst = destination;
 					moveList[curMoveNum].move.promotion = EMPTY;
+					if(board.squares[destination] == EMPTY){
+						next_audio_flag = 1;
+					}
+					else {
+						next_audio_flag = 4;
+					}
 					do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
 					curMoveNum++;
 
@@ -128,6 +145,9 @@ jumpBack:
 			if (state == checking) {
 				// Looking for checkmate
 				// look for check before jumping into this to avoid wasting time
+				if(is_check(&board)) {
+					next_audio_flag = 3;
+				}
 				numLegalMoves = gen_legal_moves(&board, legalMoves);
 				if (numLegalMoves == 0) {
 					if (is_check(&board)) {
@@ -329,6 +349,8 @@ jumpBack:
 		case NoPress:
 			break;
 		}
+		audio_flag = next_audio_flag;
+		next_audio_flag = 0;
 	}
 	if(winner == 2) {
 		//return to main menu
@@ -336,12 +358,14 @@ jumpBack:
 	else if (winner == 1) {
 		clear_feedback();
         update_feedback("BLACK WINS", 10, 4);
+        audio_flag = 5;
         HAL_Delay(5000);
 		//return to main menu
 	}
 	else {
 		clear_feedback();
         update_feedback("WHITE WINS", 10, 4);
+        audio_flag = 5;
         HAL_Delay(5000);
 		//return to main menu
 	}

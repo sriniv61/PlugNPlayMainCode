@@ -24,6 +24,7 @@ void initTIM1();
 void initTIM2();
 void initTIM1prep();
 void initTIM3();
+void init_wavetable();
 
 uint8_t framebuffer[VGA_H_PX + 1][VGA_W_PX + 1];
 

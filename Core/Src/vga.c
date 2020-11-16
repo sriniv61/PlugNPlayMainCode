@@ -9,6 +9,14 @@
 
 #include "stm32f4xx.h"
 #include "vga.h"
+#include "main.h"
+
+void init_wavetable(void) {
+	int x;
+	for(x = 0; x<1000; x++){
+		wavetable[x] = 32767 * sin(2 * 3.14159 * x / 1000);
+	}
+}
 
 void initGPIO()
 {
