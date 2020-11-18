@@ -28,6 +28,7 @@
 #define freq_check 3
 #define freq_capture 2
 #define freq_win 7
+#define freq_cursor 1
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,7 +76,7 @@ int nextBuffer = 1;
 const static float FREQ_TABLE_HARRY_POTTER[FREQ_N] 	    = {123.47,	164.81, 196.00, 185.00, 164.81, 246.94, 220.00, 185.00, 164.81, 196.00, 185.00, 146.83, 174.61, 123.47, 10.00, 123.47, 164.81, 196.00, 185.00, 164.81, 246.94, 293.66, 277.18, 261.63, 207.65, 261.63, 246.94, 233.08, 116.54, 196.00, 164.81};
 const static int TICK_TABLE_HARRY_POTTER[FREQ_N] 		= {5000, 7500, 2500, 5000, 10000, 5000, 15000, 15000, 7500, 2500, 5000, 10000, 5000, 25000, 2500, 5000, 7500, 2500, 5000, 10000, 5000, 10000, 5000, 10000, 5000, 7500, 2500, 5000, 10000, 5000, 25000};
 
-const static float freq_array_place[freq_place] 	    = {185.00};
+const static float freq_array_place[freq_place] 	    = {523};
 const static int tick_counts_place[freq_place] 		= {100};
 const static float freq_array_error[freq_error] 	    = {783.99, 554.37};
 const static int tick_counts_error[freq_error] 		= {50, 200};
@@ -85,6 +86,8 @@ const static float freq_array_capture[freq_capture] 	    = {146.83,185.00};
 const static int tick_counts_capture[freq_capture] 		= {100, 200};
 const static float freq_array_win[freq_win] 	    = {261.63, 329.63, 392.00, 1, 392.00, 329.63, 392.00};
 const static int tick_counts_win[freq_win] 		= {250, 250, 250, 25, 375, 125, 500};
+const static float freq_array_cursor[freq_cursor] 	    = {783.99};
+const static int tick_counts_cursor[freq_cursor] 		= {30};
 
 int offset = 0;
 int tick_counter = 0;
@@ -251,6 +254,10 @@ void TIM3_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+	if(volume == 0){
+		TIM6->SR &= ~TIM_SR_UIF;
+		return;
+	}
 	switch(audio_flag){
 	case 6:
 		step = FREQ_TABLE_HARRY_POTTER[freq_idx] * 1000 / 100000 * (1 << 16);
@@ -375,6 +382,29 @@ void TIM6_DAC_IRQHandler(void)
 			freq_idx++;
 			tick_counter = 0;
 			if(freq_idx == freq_win) {
+				freq_idx = 0;
+				audio_flag = 0;
+			}
+		}
+		offset += step;
+		if((offset>>16) >= 1000) {
+		  offset -= 1000<<16;
+		}
+		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, wavetable[offset>>16] / 16 + 2048);
+//		DAC->DHR12R1 = wavetable[offset>>16] / 16 + 2048;
+//		DAC->SWTRIGR |= DAC_SWTRIGR_SWTRIG1;
+		while((DAC->SWTRIGR & DAC_SWTRIGR_SWTRIG1) == DAC_SWTRIGR_SWTRIG1);
+
+
+		TIM6->SR &= ~TIM_SR_UIF;
+		break;
+	case 7://win
+		step = freq_array_cursor[freq_idx] * 1000 / 100000 * (1 << 16);
+		tick_counter++;
+		if(tick_counter == tick_counts_cursor[freq_idx] * 100) {
+			freq_idx++;
+			tick_counter = 0;
+			if(freq_idx == freq_cursor) {
 				freq_idx = 0;
 				audio_flag = 0;
 			}

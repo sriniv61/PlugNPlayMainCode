@@ -17,8 +17,10 @@
 #define GREEN 4
 #define YELLOW 60
 #define BEIGE 62
+#define BEIGE 62
 #define G 62//shorthand beige
-#define PURPLE 34
+#define PURPLE 17
+#define P 17//shorthand purple
 #define BLUE 7
 
 #define BOARD_UPPER_LEFT_X 3
@@ -30,11 +32,24 @@
 #define B 0
 #define W 63
 
+typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl} menuState;
+typedef enum settingsState {None, Chess} settingsState;
+
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);
-void update_feedback(char * letter_array, int size, int row);
+void print_string(char * letter_array, int size, int row, int startCharPos);
 //void write_char(uint8_t ** letter_array, int startColumn, int startRow);
 void update_options(gameState state);
 void clear_feedback();
+void menu_init();
+void menu_update(int cursorPos, menuState state, settingsState sState);
+
+static uint8_t triangle_cursor[5][3] = {
+    {P, G, G},
+    {P, P, G},
+    {P, P, P},
+    {P, P, G},
+    {P, G, G}
+};
 
 static uint8_t a_char[5][3] = {
 
@@ -320,135 +335,263 @@ static uint8_t empty[18][18] =
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
 };
 
-static uint8_t pawn[18][18] =
+static uint8_t rook_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, W, W, B, W, W, B, B, W, W, B, W, W, B, B, B},
+    {B, B, B, W, W, B, W, W, B, B, W, W, B, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, B, B, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, B, B, B, B, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, B, B, B, B, W, W, B, B, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+static uint8_t knight_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, B, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, B, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, W, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, W, W, W, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, B, W, W, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+static uint8_t pawn_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+
+static uint8_t bishop_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, B, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+
+
+static uint8_t king_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+static uint8_t queen_m[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, W, B, W, W, W, W, B, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
+};
+
+static uint8_t pawn_c[18][18] =
 {
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
 
-static uint8_t king[18][18] =
+static uint8_t king_c[18][18] =
 {
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, B, B, W, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, W, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, W, B, B, B, B, B, B, B},
 	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, W, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, W, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, B, B, B, B, W, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+	{B, B, B, W, W, B, W, W, W, W, W, W, B, W, W, B, B, B},
+	{B, B, B, W, W, B, B, B, W, W, B, B, B, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
 
-static uint8_t queen[18][18] =
+static uint8_t queen_c[18][18] =
 {
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, W, B, B, W, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, W, B, B, B, B, W, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, B, B, B, W, B, B, B, B, B},
-	{B, B, B, B, B, B, W, B, B, B, B, W, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, W, B, B, W, B, W, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, W, W, B, B, B, W, W, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, W, B, B, W, W, B, B, W, B, B, B, B, B},
+	{B, B, B, B, W, W, B, W, W, W, W, B, W, W, B, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
 
-static uint8_t bishop[18][18] =
+static uint8_t bishop_c[18][18] =
 {
 	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, B, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, B, W, W, W, B, B, B, B, B, B},
+	{B, B, B, B, B, B, W, W, W, B, W, W, B, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, B, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, B, B, B, B, W, W, W, W, B, B, B, B, B, B, B},
+	{B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
-static uint8_t rook[18][18] =
-{
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, W, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, W, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, W, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+static uint8_t rook_c[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, W, W, B, W, W, B, B, W, W, B, W, W, B, B, B},
+    {B, B, B, W, W, B, W, W, B, B, W, W, B, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, B, B, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, B, B, B, B, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, B, B, B, B, W, W, B, B, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
 
-static uint8_t knight[18][18] =
-{
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, W, B, B, B, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, W, B, B, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, W, B, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, W, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, W, B, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, W, B, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, W, B, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, W, B, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, W, W, B, B, B},
-	{B, B, B, B, W, B, B, B, B, B, B, B, B, B, W, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
-	{B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+
+static uint8_t knight_c[18][18] = {
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, B, W, B, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, B, W, W, B, B, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, W, W, W, W, W, W, W, W, W, W, B, W, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, W, W, W, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, B, W, W, B, B, B},
+    {B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, B, B, W, W, W, W, W, B, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, B, B, W, W, W, W, W, W, W, W, B, B, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, W, W, W, W, W, W, W, W, W, W, W, W, B, B, B},
+    {B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B}
 };
 
 #endif /* SRC_BUFFER_FUNCS_H_ */

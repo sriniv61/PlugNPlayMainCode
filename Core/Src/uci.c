@@ -20,7 +20,7 @@
 //	TIM6->CR1 &= ~TIM_CR1_CEN;
 //}
 
-void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
+void uci_main(SPI_HandleTypeDef *hspi2) {
     bb_init();
 //    return;
 	Board board;
@@ -49,7 +49,7 @@ void uci_main(SPI_HandleTypeDef *hspi2, UART_HandleTypeDef *huart2) {
 	memset(highlightedDests, -1, sizeof(int) * 64);
 
 	int next_audio_flag = 0;
-	board_print(&board, huart2, cursorPos, highlightedDests);
+	board_print(&board, cursorPos, highlightedDests);
 	clear_feedback();
 
 //	int pressNum = 0;
@@ -84,7 +84,7 @@ jumpBack:
 				state = waitingForSecond;
 				clear_feedback();
 				// display highlighted squares
-				board_print(&board, huart2, cursorPos, highlightedDests);
+				board_print(&board, cursorPos, highlightedDests);
 				break;
 
 			case waitingForSecond:
@@ -135,37 +135,11 @@ jumpBack:
 					memset(highlightedDests, -1, sizeof(Move) * 64);
 					state = checking;
 					clear_feedback();
-					board_print(&board, huart2, cursorPos, highlightedDests);
+					board_print(&board, cursorPos, highlightedDests);
 				}
 				break;
 			default:
 				break;
-			}
-			// After every move these things will be checked
-			if (state == checking) {
-				// Looking for checkmate
-				// look for check before jumping into this to avoid wasting time
-				if(is_check(&board)) {
-					next_audio_flag = 3;
-				}
-				numLegalMoves = gen_legal_moves(&board, legalMoves);
-				if (numLegalMoves == 0) {
-					if (is_check(&board)) {
-						//checkmate
-						if (board.color == BLACK)
-							winner = 0;
-						else
-							winner = 1;
-					} else {
-						//stalemate
-						winner = 2;
-					}
-				}
-
-				// Resetting state
-				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				state = waitingForFirst;
-				clear_feedback();
 			}
 			break;
 		case BPress:
@@ -194,7 +168,7 @@ jumpBack:
 				clear_feedback();
 	            update_feedback("MOVE ABORTED", 12, 0);
 			}
-			board_print(&board, huart2, cursorPos, highlightedDests);
+			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case SePress:
 			if(state == waitingForThird) {
@@ -213,7 +187,7 @@ jumpBack:
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 				memset(highlightedDests, -1, sizeof(Move) * 64);
 				state = checking;
-				board_print(&board, huart2, cursorPos, highlightedDests);
+				board_print(&board, cursorPos, highlightedDests);
 				clear_feedback();
 			}
 			// User wants to resign
@@ -247,7 +221,7 @@ jumpBack:
 				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 				memset(highlightedDests, -1, sizeof(Move) * 64);
 				state = checking;
-				board_print(&board, huart2, cursorPos, highlightedDests);
+				board_print(&board, cursorPos, highlightedDests);
 				clear_feedback();
 			}
 			// User wants to offer draw
@@ -265,7 +239,7 @@ jumpBack:
 				    winner = 2;
 		            update_feedback("WHITE", 5, 3);
 		            update_feedback("ACCEPTS", 7, 4);
-		            HAL_Delay(3000);
+		            HAL_Delay(2000);
 		            clear_feedback();
 			    }
 			    else {
@@ -289,7 +263,7 @@ jumpBack:
 				    winner = 2;
 		            update_feedback("BLACK", 5, 3);
 		            update_feedback("ACCEPTS", 7, 4);
-		            HAL_Delay(3000);
+		            HAL_Delay(2000);
 					clear_feedback();
 					//print draw
 			    }
@@ -311,7 +285,7 @@ jumpBack:
 				if (cursorPos >= 8)
 					cursorPos -= 8;
 			}
-			board_print(&board, huart2, cursorPos, highlightedDests);
+			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case DPress:
 			if(board.color == WHITE) {
@@ -322,7 +296,7 @@ jumpBack:
 				if (cursorPos <= 55)
 					cursorPos += 8;
 			}
-			board_print(&board, huart2, cursorPos, highlightedDests);
+			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case LPress:
 			if(board.color == WHITE) {
@@ -333,7 +307,7 @@ jumpBack:
 				if (cursorPos % 8 != 7)
 					cursorPos++;
 			}
-			board_print(&board, huart2, cursorPos, highlightedDests);
+			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case RPress:
 			if(board.color == WHITE) {
@@ -344,29 +318,58 @@ jumpBack:
 				if (cursorPos % 8 != 0)
 					cursorPos--;
 			}
-			board_print(&board, huart2, cursorPos, highlightedDests);
+			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case NoPress:
 			break;
 		}
+		// After every move these things will be checked
+		if (state == checking) {
+			// Looking for checkmate
+			// look for check before jumping into this to avoid wasting time
+			if(is_check(&board)) {
+				next_audio_flag = 3;
+			}
+			numLegalMoves = gen_legal_moves(&board, legalMoves);
+			if (numLegalMoves == 0) {
+				if (is_check(&board)) {
+					//checkmate
+					if (board.color == BLACK)
+						winner = 0;
+					else
+						winner = 1;
+				} else {
+					//stalemate
+					winner = 2;
+				}
+			}
+
+			// Resetting state
+			memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
+			state = waitingForFirst;
+			clear_feedback();
+		}
 		audio_flag = next_audio_flag;
 		next_audio_flag = 0;
 	}
+	clear_feedback();
 	if(winner == 2) {
-		//return to main menu
+        update_feedback("DRAW", 4, 1);
 	}
 	else if (winner == 1) {
-		clear_feedback();
-        update_feedback("BLACK WINS", 10, 4);
+        update_feedback("BLACK WINS", 10, 1);
         audio_flag = 5;
-        HAL_Delay(5000);
-		//return to main menu
 	}
 	else {
-		clear_feedback();
-        update_feedback("WHITE WINS", 10, 4);
+        update_feedback("WHITE WINS", 10, 1);
         audio_flag = 5;
-        HAL_Delay(5000);
 		//return to main menu
 	}
+	update_feedback("USER ONE", 8, 3);
+	update_feedback("PRESS A", 7, 4);
+	update_feedback("TO RETURN", 9, 5);
+	update_feedback("TO MENU", 7, 6);
+
+	while (getButtonPress(hspi2, 0) != APress);
+
 }

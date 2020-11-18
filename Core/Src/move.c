@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gen.h"
-#include "move.h"
 #include "util.h"
+#include "move.h"
+#include "gen.h"
 
 #define TOGGLE_HASH(board) \
     board->hash ^= HASH_CASTLE[board->castle]; \

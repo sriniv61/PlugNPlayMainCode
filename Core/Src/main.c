@@ -103,7 +103,24 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+
+
   /* USER CODE BEGIN Init */
+
+  //READ FLASH
+//  uint32_t Address;
+//  __IO uint64_t data32 = 0;
+//  Address = ((uint32_t)0x08020000);
+//
+//  while (Address < 0x80fffff)
+//  {
+//    data32 = *(__IO uint64_t*)Address;
+//
+//    Address = Address + 8;
+//  }
+
+  volume = 1;
+  piece_set = 0;
 
   /* USER CODE END Init */
 
@@ -148,7 +165,8 @@ int main(void)
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_Base_Start(&htim2);
   HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-  uci_main(&hspi2, &huart2);
+  main_menu(&hspi2);
+//  uci_main(&hspi2);
   while (1)
   {
     /* USER CODE END WHILE */
@@ -540,6 +558,7 @@ static void MX_TIM6_Init(void)
 
 	TIM6->DIER |= TIM_DIER_UIE;
 	TIM6->CR1 |= TIM_CR1_CEN;
+	HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 15, 15);
 	NVIC->ISER[0] |= 1<<TIM6_DAC_IRQn;
   /* USER CODE END TIM6_Init 2 */
 

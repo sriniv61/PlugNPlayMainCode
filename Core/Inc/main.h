@@ -35,6 +35,7 @@ extern "C" {
 #include "../Src/buttons.h"
 #include "../Src/uci.h"
 #include "../Src/vga.h"
+#include "../Src/main_menu.h"
 #include "../Src/buffer_funcs.h"
 /* USER CODE END Includes */
 
@@ -139,9 +140,12 @@ void Error_Handler(void);
 #define MEMS_INT2_Pin GPIO_PIN_1
 #define MEMS_INT2_GPIO_Port GPIOE
 
+volatile int piece_set;//0 = modern 1 = classic
+volatile int volume; //0 = off, 1 = on
+
 volatile int drawNewFrame;
 volatile int wavetable[1000];
-volatile int audio_flag; //0 = nothing, 1 = place piece, 2 = error, 3 = check, 4 = capture, 5 = win
+volatile int audio_flag; //0 = nothing, 1 = place piece, 2 = error, 3 = check, 4 = capture, 5 = win, 6 = harry potter, 7 = menu cursor
 DAC_HandleTypeDef hdac;
 
 /* USER CODE END Private defines */
