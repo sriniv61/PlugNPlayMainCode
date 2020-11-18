@@ -352,23 +352,22 @@ jumpBack:
 		audio_flag = next_audio_flag;
 		next_audio_flag = 0;
 	}
-	clear_feedback();
 	if(winner == 2) {
-        update_feedback("DRAW", 4, 1);
+        update_feedback("DRAW", 4, 2);
 	}
 	else if (winner == 1) {
-        update_feedback("BLACK WINS", 10, 1);
+        update_feedback("BLACK WINS", 10, 2);
         audio_flag = 5;
 	}
 	else {
-        update_feedback("WHITE WINS", 10, 1);
+        update_feedback("WHITE WINS", 10, 2);
         audio_flag = 5;
 		//return to main menu
 	}
-	update_feedback("USER ONE", 8, 3);
-	update_feedback("PRESS A", 7, 4);
-	update_feedback("TO RETURN", 9, 5);
-	update_feedback("TO MENU", 7, 6);
+	update_feedback("USER ONE", 8, 4);
+	update_feedback("PRESS A", 7, 5);
+	update_feedback("TO RETURN", 9, 6);
+	update_feedback("TO MENU", 7, 7);
 
 	while (getButtonPress(hspi2, 0) != APress);
 
