@@ -332,6 +332,7 @@ jumpBack:
 			}
 			numLegalMoves = gen_legal_moves(&board, legalMoves);
 			if (numLegalMoves == 0) {
+				next_audio_flag = 0;
 				if (is_check(&board)) {
 					//checkmate
 					if (board.color == BLACK)
