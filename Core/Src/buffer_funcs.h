@@ -38,7 +38,7 @@ typedef enum settingsState {None, Chess} settingsState;
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);
 void print_string(char * letter_array, int size, int row, int startCharPos);
 //void write_char(uint8_t ** letter_array, int startColumn, int startRow);
-void update_options(gameState state);
+void update_options(gameState state, int promotion);
 void clear_feedback();
 void menu_init();
 void menu_update(int cursorPos, menuState state, settingsState sState);

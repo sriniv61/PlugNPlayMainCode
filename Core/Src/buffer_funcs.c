@@ -515,7 +515,7 @@ void update_feedback(char * str, int size, int row) {
 	}
 }
 
-void update_options(gameState state) {
+void update_options(gameState state, int promotion) {
 	switch(state) {
 	case waitingForFirst:
 		update_feedback("B = TAKEBACK", 12, 5);
@@ -528,9 +528,24 @@ void update_options(gameState state) {
 		update_feedback("ST = DRAW", 10, 7);
 		break;
 	case waitingForThird:
-		update_feedback("B = UNDO", 8, 5);
-		update_feedback("SE = QUEEN", 11, 6);
-		update_feedback("ST = KNIGHT", 12, 7);
+		// writing 6 characters to each so that it clears the previous promotion option
+		switch (promotion){
+			case QUEEN:
+				update_feedback("QUEEN ", 6, 6);
+				break;
+			case KNIGHT:
+				update_feedback("KNIGHT", 6, 6);
+				break;
+			case BISHOP:
+				update_feedback("BISHOP", 6, 6);
+				break;
+			case ROOK:
+				update_feedback("ROOK  ", 6, 6);
+				break;
+		}
+		update_feedback("A = SELECT", 10, 7);
+		break;
+	default:
 		break;
 	}
 }

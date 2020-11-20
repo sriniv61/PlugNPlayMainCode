@@ -47,10 +47,10 @@ void uci_main(SPI_HandleTypeDef *hspi2) {
 //	int pressNum = 0;
 //	buttonPress test[15] = {UPress, APress, UPress, APress, UPress, UPress, UPress, UPress, APress, DPress, APress, DPress, DPress, DPress, APress};
 	while (winner == RESET) {
-		update_options(state);
+		update_options(state, promotion);
 jumpBack:
 		userInput = getButtonPress(hspi2, board.color);
-		if((state == waitingForThird) && ((userInput != SePress) && (userInput != StPress) && (userInput != BPress)))
+		if((state == waitingForThird) && ((userInput != DPress) && (userInput != UPress) && (userInput != BPress) && (userInput != APress)))
 				goto jumpBack;
 		switch (userInput) {
 		case APress:
@@ -99,6 +99,12 @@ jumpBack:
 		            clear_feedback();
 		            update_feedback("SELECT", 6, 0);
 		            update_feedback("PROMOTION", 9, 1);
+		            update_feedback("CHANGE WITH", 11, 2);
+		            update_feedback("UP OR DOWN", 10, 3);
+
+		            // initializing promotion as queen
+		            promotion = QUEEN;
+
 				} else {
 					// make the desired move
 					// create a new move node (passing through the inputs and the current node)
@@ -119,16 +125,31 @@ jumpBack:
 					// Reset selectedPiece, source, destination, and promotion to -1
 					source = destination = promotion = RESET;
 					// Then free the valid move list
-					/*printf("Move list: \n");
-					 for(index = 0; index < numLegalMoves; index++){
-					 printf("src: %d, dest: %d\n", legalMoves[index].src, legalMoves[index].dst);
-					 }*/
 					memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
 					memset(highlightedDests, -1, sizeof(Move) * 64);
 					state = checking;
 					clear_feedback();
 					board_print(&board, cursorPos, highlightedDests);
 				}
+				break;
+			case waitingForThird:
+				// make the desired move
+				// create a new move node (passing through the inputs and the current node)
+				// Execute the new move on the actual board
+				// Saving the move into currentMove
+				moveList[curMoveNum].move.src = source;
+				moveList[curMoveNum].move.dst = destination;
+				moveList[curMoveNum].move.promotion = promotion;
+				do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
+				curMoveNum++;
+				// Reset selectedPiece, source, destination, and promotion to -1
+				source = destination = promotion = RESET;
+				// Then free the valid move list
+				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
+				memset(highlightedDests, -1, sizeof(Move) * 64);
+				state = checking;
+				board_print(&board, cursorPos, highlightedDests);
+				clear_feedback();
 				break;
 			default:
 				break;
@@ -163,27 +184,8 @@ jumpBack:
 			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case SePress:
-			if(state == waitingForThird) {
-				// make the desired move
-				// create a new move node (passing through the inputs and the current node)
-				// Execute the new move on the actual board
-				// Saving the move into currentMove
-				moveList[curMoveNum].move.src = source;
-				moveList[curMoveNum].move.dst = destination;
-				moveList[curMoveNum].move.promotion = QUEEN;
-				do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
-				curMoveNum++;
-				// Reset selectedPiece, source, destination, and promotion to -1
-				source = destination = RESET;
-				// Then free the valid move list
-				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * 64);
-				state = checking;
-				board_print(&board, cursorPos, highlightedDests);
-				clear_feedback();
-			}
 			// User wants to resign
-			else if (board.color){
+			if (board.color){
 				winner = 0;
 				clear_feedback();
 	            update_feedback("BLACK", 5, 0);
@@ -197,27 +199,8 @@ jumpBack:
 			}
 			break;
 		case StPress:
-			if(state == waitingForThird) {
-				// make the desired move
-				// create a new move node (passing through the inputs and the current node)
-				// Execute the new move on the actual board
-				// Saving the move into currentMove
-				moveList[curMoveNum].move.src = source;
-				moveList[curMoveNum].move.dst = destination;
-				moveList[curMoveNum].move.promotion = KNIGHT;
-				do_move(&board, &(moveList[curMoveNum].move), &(moveList[curMoveNum].undo));
-				curMoveNum++;
-				// Reset selectedPiece, source, destination, and promotion to -1
-				source = destination = RESET;
-				// Then free the valid move list
-				memset(legalMoves, -1, sizeof(Move) * MAX_MOVES);
-				memset(highlightedDests, -1, sizeof(Move) * 64);
-				state = checking;
-				board_print(&board, cursorPos, highlightedDests);
-				clear_feedback();
-			}
 			// User wants to offer draw
-			else if (board.color){
+			if (board.color){
 				clear_feedback();
 	            update_feedback("BLACK OFFERS", 12, 0);
 	            update_feedback("DRAW", 4, 1);
@@ -269,7 +252,11 @@ jumpBack:
 			}
 			break;
 		case UPress:
-			if(board.color == WHITE) {
+			if (state == waitingForThird){
+				if (promotion < QUEEN)
+					promotion++;
+			}
+			else if(board.color == WHITE) {
 				if (cursorPos <= 55)
 					cursorPos += 8;
 			}
@@ -280,7 +267,11 @@ jumpBack:
 			board_print(&board, cursorPos, highlightedDests);
 			break;
 		case DPress:
-			if(board.color == WHITE) {
+			if (state == waitingForThird){
+				if (promotion > KNIGHT)
+					promotion--;
+			}
+			else if(board.color == WHITE) {
 				if (cursorPos >= 8)
 					cursorPos -= 8;
 			}
