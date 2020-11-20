@@ -11,14 +11,6 @@
 
 #define RESET -1
 
-//void audio_out(){
-//	audio_flag = 1;
-//	TIM6->DIER |= TIM_DIER_UIE;
-//	TIM6->CR1 |= TIM_CR1_CEN;
-//	audio_flag = 0;
-//	TIM6->DIER &= ~TIM_DIER_UIE;
-//	TIM6->CR1 &= ~TIM_CR1_CEN;
-//}
 
 void uci_main(SPI_HandleTypeDef *hspi2) {
     bb_init();

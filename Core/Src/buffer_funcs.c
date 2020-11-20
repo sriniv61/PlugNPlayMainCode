@@ -58,8 +58,8 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 					print_string("GAME THREE", 10, 4, 30);
 					break;
 				case Chess:
-					print_string("MODERN", 6, 2, 32);
-					print_string("CLASSIC", 7, 3, 32);
+					print_string("MODERN PIECES", 13, 2, 28);
+					print_string("CLASSIC PIECES", 14, 3, 28);
 					break;
 			}
 			for(int i = 0; i < 3; i++){
@@ -70,6 +70,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 		case VolumeControl:
 			print_string("OFF", 3, 2, 33);
 			print_string("ON", 2, 3, 34);
+			print_string("TEST", 4, 4, 33);
 			for(int i = 0; i < 3; i++){
 				if(i != cursorPos) print_string(" ", 1, i + 2, 26);
 				else print_string(">", 1, i + 2, 26);
