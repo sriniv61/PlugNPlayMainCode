@@ -58,6 +58,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 					print_string("GAME THREE", 10, 4, 30);
 					break;
 				case Chess:
+					print_string("CHOOSE PIECE SET", 16, 1, 27);
 					print_string("MODERN PIECES", 13, 2, 28);
 					print_string("CLASSIC PIECES", 14, 3, 28);
 					break;
