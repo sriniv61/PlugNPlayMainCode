@@ -23,7 +23,6 @@
 #define BLUE1 GPIO_PIN_7
 
 
-
 void initGPIO();	//All VGA GPIO Configuration
 void initDMA0();	//DMA that handles pixel transfers
 void initTIM1();
@@ -38,6 +37,8 @@ int framebufferLoop;
 int drawnLines;
 int nextFramebufferLine;
 int nextBuffer;
+
+volatile int drawNewFrame;
 
 
 #endif /* SRC_VGA_H_ */

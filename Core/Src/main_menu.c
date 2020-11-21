@@ -1,10 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+
 #include "main_menu.h"
-#define MAX_WELCOME_OPTIONS 3
-#define MAX_GAMES 3
-#define MAX_CHESS_SETTINGS 2
-#define MAX_VOLUME_SETTINGS 3
+
 
 int audio_level; //Audio: 0 - low; 1 - med; 2 - high
 int cursorPosition = 0;
@@ -148,7 +144,6 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 						cursorPosition++;
 					break;
 				case APress:
-					// Only for testing purposes
 					switch (cursorPosition){
 						case 0:
 							volume = 0;
@@ -158,7 +153,7 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 							break;
 						// Only for testing purposes, will play harry potter song
 						case 2:
-							audio_flag = 6;
+							audio_flag = HARRY_POTTER;
 							break;
 						default:
 							break;
@@ -189,11 +184,11 @@ void main_menu(SPI_HandleTypeDef * hspi2)
         state_change(inp, hspi2);
 
         // Give feedback sound
-    	if(inp == UPress || inp == DPress) audio_flag = 7;
+    	if(inp == UPress || inp == DPress) audio_flag = MENU_CURSOR;
     	if(inp == APress){
     		// If not testing audio, then set the click sound
-    		if (audio_flag != 6)
-    			audio_flag = 1;
+    		if (audio_flag != HARRY_POTTER)
+    			audio_flag = MOVE;
     	}
 
     	menu_update(cursorPosition, state, sState);

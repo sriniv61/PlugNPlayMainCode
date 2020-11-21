@@ -19,11 +19,14 @@
 #define freq_cursor 1
 
 // Chess move sounds
+#define SILENCE 0
 #define MOVE 1
 #define INVALID 2
 #define CHECK 3
 #define CAPTURE 4
 #define WINNER 5
+#define HARRY_POTTER 6
+#define MENU_CURSOR 7
 
 
 volatile int wavetable[1000];
@@ -50,6 +53,9 @@ int offset;
 int tick_counter;
 int freq_idx;
 int step;
+
+// Global variable for deciding if the user wants audio on or off
+volatile int volume; //0 = off, 1 = on
 
 
 #endif /* SRC_AUDIO_H_ */

@@ -12,34 +12,40 @@
 #include "vga.h"
 #include "board.h"
 #include "uci.h"
+#include "main_menu.h"
 
-#define GRAY 42
-#define GREEN 4
-#define YELLOW 60
-#define BEIGE 62
-#define BEIGE 62
-#define G 62		//shorthand beige
-#define PURPLE 17
-#define P 17		//shorthand purple
-#define BLUE 7
-
+#define GRAY 42		// pixel value for gray
+#define GREEN 4		// pixel value for green
+#define YELLOW 60	// pixel value for yellow
+#define BEIGE 62	// pixel value for beige
+#define G 62		// shorthand beige
+#define PURPLE 17	// pixel value for purple
+#define P 17		// shorthand purple
+#define BLUE 7		// pixel value for blue
 
 #define BOARD_UPPER_LEFT_X 3 	// x value of the upper left pixel of the buffer
 #define BOARD_UPPER_LEFT_Y 3	// y value of the upper left pixel of the buffer
-#define TILE_WIDTH 18		/
+#define TILE_WIDTH 18
 #define B 0 	// The pixel value for black
-#define W 63	// The piexl value for white
+#define W 63	// The pixel value for white
 
+/*
+ * Main Menu specific enums: defined here until we can fix the issue of
+ * this file not being able to see the main_menu.h file that was #included above
+ */
 typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl} menuState;
 typedef enum settingsState {None, Chess} settingsState;
 
+
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);
 void print_string(char * letter_array, int size, int row, int startCharPos);
-//void write_char(uint8_t ** letter_array, int startColumn, int startRow);
 void update_options(gameState state, int promotion);
 void clear_feedback();
 void menu_init();
+
 void menu_update(int cursorPos, menuState state, settingsState sState);
+
+
 
 static uint8_t triangle_cursor[5][3] = {
     {P, G, G},
@@ -48,6 +54,19 @@ static uint8_t triangle_cursor[5][3] = {
     {P, P, G},
     {P, G, G}
 };
+
+/*
+ * For all pieces, B (black) is the background color and W (white) is how it's being drawn
+ *
+ * For all characters, G (beige) is the background and B (black) is how it's being drawn
+ */
+
+/*
+ *
+ * BEGINNING OF CHARACTER DEFINITIONS
+ *
+ */
+
 
 static uint8_t a_char[5][3] = {
 
@@ -310,6 +329,12 @@ static uint8_t eq_char[5][3] = {
     {G, G, G}
 };
 
+
+/*
+ *
+ * BEGINNING OF PIECE DEFINITIONS
+ *
+ */
 
 static uint8_t empty[18][18] =
 {

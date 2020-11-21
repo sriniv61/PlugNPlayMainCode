@@ -21,11 +21,11 @@ void TIM6_DAC_IRQHandler(void)
 	}
 	switch(audio_flag){
 		// Silent, only acknowledging the interrupt
-		case 0:
+		case SILENCE:
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// Sound for placing a piece
-		case 1:
+		case MOVE:
 			step = freq_array_place[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_place[freq_idx] * 100) {
@@ -46,7 +46,7 @@ void TIM6_DAC_IRQHandler(void)
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// Sound for an error (invalid destination, etc.)
-		case 2:
+		case INVALID:
 			step = freq_array_error[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_error[freq_idx] * 100) {
@@ -67,7 +67,7 @@ void TIM6_DAC_IRQHandler(void)
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// Sound when a player puts the other in check
-		case 3:
+		case CHECK:
 			step = freq_array_check[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_check[freq_idx] * 100) {
@@ -88,7 +88,7 @@ void TIM6_DAC_IRQHandler(void)
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// Sound when a player captures one of the other player's pieces
-		case 4:
+		case CAPTURE:
 			step = freq_array_capture[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_capture[freq_idx] * 100) {
@@ -109,7 +109,7 @@ void TIM6_DAC_IRQHandler(void)
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// Sound when one of the players wins
-		case 5:
+		case WINNER:
 			step = freq_array_win[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_win[freq_idx] * 100) {
@@ -130,7 +130,7 @@ void TIM6_DAC_IRQHandler(void)
 			TIM6->SR &= ~TIM_SR_UIF;
 			break;
 		// harry potter audio test
-			case 6:
+			case HARRY_POTTER:
 				step = FREQ_TABLE_HARRY_POTTER[freq_idx] * 1000 / 100000 * (1 << 16);
 				tick_counter++;
 				if(tick_counter >= TICK_TABLE_HARRY_POTTER[freq_idx] * 10) {
@@ -151,7 +151,7 @@ void TIM6_DAC_IRQHandler(void)
 				TIM6->SR &= ~TIM_SR_UIF;
 				break;
 		// The sound when the cursor is moved on the main menu
-		case 7:
+		case MENU_CURSOR:
 			step = freq_array_cursor[freq_idx] * 1000 / 100000 * (1 << 16);
 			tick_counter++;
 			if(tick_counter >= tick_counts_cursor[freq_idx] * 100) {

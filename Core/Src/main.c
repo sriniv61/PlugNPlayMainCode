@@ -116,9 +116,8 @@ int main(void)
   drawnLines = 0;
   nextBuffer = 1;
 
-  // Initializing the piece_set being used
+  // Initializing the piece_set being used (in main_menu.h)
   piece_set = 0;
-
 
   /* USER CODE END Init */
 
@@ -159,7 +158,6 @@ int main(void)
 
   /* USER CODE END 2 */
 
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   My_SPI2_INIT(&hspi2);
@@ -167,8 +165,9 @@ int main(void)
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_Base_Start(&htim2);
   HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+
   main_menu(&hspi2);
-//  uci_main(&hspi2);
+
   while (1)
   {
     /* USER CODE END WHILE */
