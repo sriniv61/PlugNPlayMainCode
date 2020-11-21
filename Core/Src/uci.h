@@ -2,7 +2,8 @@
 #define UCI_H
 
 
-typedef enum gameState {waitingForFirst, waitingForSecond, waitingForThird, checking} gameState;
+#define RESET -1
+typedef enum gameState {pieceSelection, destinationSelection, promotionSelection, checking} gameState;
 
 void uci_main(SPI_HandleTypeDef * hspi2);
 //void audio_out();

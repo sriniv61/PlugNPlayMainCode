@@ -29,12 +29,16 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 
 	buttonPress buttonPress = NoPress; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
 
+	/*
+	// LED feedback -- Only for testing
 	if (controller == 0){
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_RESET);
 	}
 	else{
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_SET);
 	}
+
+	*/
 	while(data[0] == 0xff) {
 		spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 		HAL_Delay(1);
@@ -45,98 +49,106 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 
 	// a gets highest precedence and so on
 	if ((invertedData & a) == a){
-		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_SET);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_SET);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOE, A_LED, GPIO_PIN_RESET);
 
 		buttonPress = APress;
 	}
 	else if ((invertedData & up) == up){
-		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
+//		HAL_GPIO_TogglePin(GPIOD, ORANGE_TOPLED);
 
 		buttonPress = UPress;
 	}
 	else if((invertedData & down) == down){
-		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
+//		HAL_GPIO_TogglePin(GPIOD, BLUE_BOTTOMLED);
 
 		buttonPress = DPress;
 	}
 	else if ((invertedData & left) == left){
-		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
+//		HAL_GPIO_TogglePin(GPIOD, GREEN_LEFTLED);
 
 		buttonPress = LPress;
 	}
 	else if ((invertedData & start) == start){
-		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_SET);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_SET);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOE, START_LED, GPIO_PIN_RESET);
 
 		buttonPress = StPress;
 	}
 	else if ((invertedData & select) == select){
-		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_SET);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_SET);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOE, SELECT_LED, GPIO_PIN_RESET);
 
 		buttonPress = SePress;
 	}
 	else if ((invertedData & b) == b){
-		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_SET);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_SET);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOE, B_LED, GPIO_PIN_RESET);
 
 		buttonPress = BPress;
 	}
 	else if ((invertedData & right1) == right1 || (invertedData & right2) == right2){
-		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
+		// LED feedback -- Only for testing
+//		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
 
 		while(data[0] != 0xff) {
 			spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
 			if(spiStatus != HAL_OK) break;
 		}
 
-		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
+//		HAL_GPIO_TogglePin(GPIOD, RED_RIGHTled);
 
 		buttonPress = RPress;
 	}
@@ -144,6 +156,10 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	return buttonPress;
 
 }
+/*
+ * An additional initialization function to ensure that SPI2 had been initialized to desired specifications
+ *
+ */
 
 void My_SPI2_INIT(SPI_HandleTypeDef * hspi2){
 

@@ -6,10 +6,7 @@
  */
 
 
-
-#include "stm32f4xx.h"
 #include "vga.h"
-#include "main.h"
 
 void init_wavetable(void) {
 	int x;
@@ -175,5 +172,58 @@ void initTIM3()
 	NVIC -> ISER[0] |= 1 << TIM3_IRQn;
 
 	TIM3 -> CR1 |= TIM_CR1_CEN;
+
+}
+
+
+
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+    TIM3 -> SR &= ~(TIM_SR_CC1IF);
+    drawNewFrame = 1;
+
+  /* USER CODE END TIM3_IRQn 0 */
+//  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+void DMA2_Stream1_IRQHandler(void)
+{
+
+	//Clear the interrupt
+	DMA2 -> LIFCR |= 0b111101000000;
+	//Flip next buffer
+	nextBuffer ^= 1;
+
+	drawnLines += 1;	//How many VGA timing lines are sent
+	framebufferLoop += 1;	//How many iterations through each framebuffer line
+	if (framebufferLoop == 4)
+	{
+		framebufferLoop = 0;
+		nextFramebufferLine += 1;	//After 4 loops, go to next line
+	}
+	if (nextFramebufferLine > 149)	//Only use up to 150th row (blank)
+	{
+		nextFramebufferLine = 150;
+	}
+
+	if (drawnLines == 628)
+	{
+		nextFramebufferLine = 0;
+		drawnLines = 0;
+		framebufferLoop = 0;
+	}
+
+	if (nextBuffer == 0)
+	{
+		DMA2_Stream1 -> M0AR = (uint32_t) framebuffer[nextFramebufferLine];
+	}
+	else
+	{
+		DMA2_Stream1 -> M1AR = (uint32_t) framebuffer[nextFramebufferLine];
+	}
 
 }

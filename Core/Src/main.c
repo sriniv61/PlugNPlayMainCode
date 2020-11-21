@@ -104,23 +104,21 @@ int main(void)
   HAL_Init();
 
 
-
   /* USER CODE BEGIN Init */
-
-  //READ FLASH
-//  uint32_t Address;
-//  __IO uint64_t data32 = 0;
-//  Address = ((uint32_t)0x08020000);
-//
-//  while (Address < 0x80fffff)
-//  {
-//    data32 = *(__IO uint64_t*)Address;
-//
-//    Address = Address + 8;
-//  }
-
+  // Initializing Volume global variables (located in audio.h)
+  offset = 0;
+  tick_counter = 0;
+  freq_idx = 0;
   volume = 1;
+
+  // Initializing VGA global variables (located in vga.h)
+  framebufferLoop = 0;
+  drawnLines = 0;
+  nextBuffer = 1;
+
+  // Initializing the piece_set being used
   piece_set = 0;
+
 
   /* USER CODE END Init */
 
@@ -142,7 +140,11 @@ int main(void)
   MX_DAC_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-	//Configure the framebuffer with interesting infromation
+
+  // These generated HAL initialization functions make our initializations not work
+  	  // TIM1, TIM2, TIM3, and DMA
+
+  // Initializing the frame buffer to an entirely black screen
 	for (int i = 0; i < VGA_H_PX; i++){
 		for (int j = 0; j < VGA_W_PX; j++){
 			framebuffer[i][j] = 0;

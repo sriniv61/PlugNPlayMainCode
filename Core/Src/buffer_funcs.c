@@ -6,16 +6,10 @@
  */
 #include "buffer_funcs.h"
 
-//Color
-//470powered, 1kground, = .42V
-//470gnd, 1kpowered, = .2V
 
-//position: tile to update
-//piece: type of piece
-//pieceColor: 0=white,1=black
-//void write_char(uint8_t ** letter_array, int startColumn, int startRow) {
-//}
-
+/*
+ * menu_init used for initializing menu upon start up
+ */
 void menu_init() {
 	for(int column = 3; column < 197; column++) {
 		for(int row = 3; row < 147; row++) {
@@ -28,6 +22,11 @@ void menu_init() {
 	print_string("VOLUME", 6, 4, 8);
 }
 
+/* menu_update
+ *
+ * used for updating the menu cursor and the options displayed on the menu screen
+ *
+ */
 void menu_update(int cursorPos, menuState state, settingsState sState)  {
 	for(int column = 100; column < 197; column++) {
 		for(int row = 21; row < 147; row++) {
@@ -80,6 +79,12 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 	}
 }
 
+/*
+ * print_string is a general function aimed for use in the main menu
+ *
+ * Pass a string, the amount of characters in the string (a max of 48), the row the string is to be printed on (0 to 7 inclusive),
+ * and the start position (from 0 to 47 inclusive, 48 being the max number of characters in a row)
+ */
 void print_string(char * str, int size, int row, int startCharPos) {
 	int startColumn;
 	int startRow;
@@ -301,6 +306,15 @@ void print_string(char * str, int size, int row, int startCharPos) {
 	}
 }
 
+/*
+ * Update_feedback function is aimed at the chess game (but can potentially be used elsewhere)
+ *
+ * pass the function a string (with a max of 12 characters, the amount of characters in the string
+ * and the desired row (from 0 to 7 inclusive)
+ *
+ * Notes: Strings must be all capital letters, no numbers, and can use " ", "?", and "="
+ */
+
 void update_feedback(char * str, int size, int row) {
 	int startColumn;
 	int startRow;
@@ -515,19 +529,26 @@ void update_feedback(char * str, int size, int row) {
 	}
 }
 
+/*
+ * Update_options used almost exclusively for chess game
+ *
+ * Used for updating the user options on the lower right side of the screen
+ *
+ * Pass through the game state and the value of the promotion variable
+ */
 void update_options(gameState state, int promotion) {
 	switch(state) {
-	case waitingForFirst:
+	case pieceSelection:
 		update_feedback("B = TAKEBACK", 12, 5);
 		update_feedback("SE = RESIGN", 12, 6);
 		update_feedback("ST = DRAW", 10, 7);
 		break;
-	case waitingForSecond:
+	case destinationSelection:
 		update_feedback("B = UNDO", 8, 5);
 		update_feedback("SE = RESIGN", 12, 6);
 		update_feedback("ST = DRAW", 10, 7);
 		break;
-	case waitingForThird:
+	case promotionSelection:
 		// writing 6 characters to each so that it clears the previous promotion option
 		switch (promotion){
 			case QUEEN:
@@ -550,6 +571,11 @@ void update_options(gameState state, int promotion) {
 	}
 }
 
+/* Clear_feedback is used for clearing the user feedback portion of the screen on the right side where the chess
+ * board is no being displayed
+ *
+ *
+ */
 void clear_feedback() {
 	for (int column = 147; column < 197; column++){
 		for (int row = 3; row < 147; row++){
@@ -557,6 +583,12 @@ void clear_feedback() {
 		}
 	}
 }
+
+/* Update_square used almost exclusively for chess game
+ *
+ * Pass through the position you'd like to draw, the piece, the piececolor (B or W), if the location is highlighted (1 or 0)
+ * if the location contains the cursor (1 or 0), and the perpective (1 or 0)
+ */
 
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective)
 {

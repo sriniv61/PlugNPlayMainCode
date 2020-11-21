@@ -18,19 +18,17 @@
 #define YELLOW 60
 #define BEIGE 62
 #define BEIGE 62
-#define G 62//shorthand beige
+#define G 62		//shorthand beige
 #define PURPLE 17
-#define P 17//shorthand purple
+#define P 17		//shorthand purple
 #define BLUE 7
 
-#define BOARD_UPPER_LEFT_X 3
-#define BOARD_UPPER_LEFT_Y 3
 
-#define BOARD_UPPER_LEFT_X 3
-#define BOARD_UPPER_LEFT_Y 3
-#define TILE_WIDTH 18
-#define B 0
-#define W 63
+#define BOARD_UPPER_LEFT_X 3 	// x value of the upper left pixel of the buffer
+#define BOARD_UPPER_LEFT_Y 3	// y value of the upper left pixel of the buffer
+#define TILE_WIDTH 18		/
+#define B 0 	// The pixel value for black
+#define W 63	// The piexl value for white
 
 typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl} menuState;
 typedef enum settingsState {None, Chess} settingsState;
