@@ -28,5 +28,4 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller);
 void My_SPI2_INIT(SPI_HandleTypeDef * hspi2);
 
 
-
 #endif /* SRC_BUTTONS_H_ */

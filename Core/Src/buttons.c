@@ -7,21 +7,29 @@
 
 #include "buttons.h"
 
+// Global variables to hold the values to be checked against
+
+static uint8_t left = ~(0xfc) ;
+static uint8_t up = ~(0xf3);
+static uint8_t right1 = ~(0x7e);
+static uint8_t right2 = ~(0xfe);
+static uint8_t down = ~(0xf9);
+
+static uint8_t a = ~(0x3f);
+static uint8_t b = ~(0x9f);
+static uint8_t select = ~(0xcf);
+static uint8_t start = ~(0xe7);
+
+/*
+ * getButtonPress
+ *
+ * Polling function that will wait until the selected controller makes a button press
+ *
+ */
 buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	// Inside the parenthesis is what we see on logic analyzer
 	// taking the inverse to more easily provide button precedence
 	uint8_t invertedData;
-
-	static uint8_t left = ~(0xfc) ;
-	static uint8_t up = ~(0xf3);
-	static uint8_t right1 = ~(0x7e);
-	static uint8_t right2 = ~(0xfe);
-	static uint8_t down = ~(0xf9);
-
-	static uint8_t a = ~(0x3f);
-	static uint8_t b = ~(0x9f);
-	static uint8_t select = ~(0xcf);
-	static uint8_t start = ~(0xe7);
 
 	HAL_StatusTypeDef spiStatus = HAL_OK;
 	uint8_t latch [1] = {0x80};
@@ -155,11 +163,82 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	return buttonPress;
 
 }
+
+
+/*
+ * getButtonPress_noWait
+ *
+ * Non-polling function that will only ask the selected user twice for a button press
+ *
+ * (asking twice to give a larger margin of error)
+ *
+ */
+buttonPress getButtonPress_noWait(SPI_HandleTypeDef * hspi2, int controller){
+	// Inside the parenthesis is what we see on logic analyzer
+	// taking the inverse to more easily provide button precedence
+	uint8_t invertedData;
+
+	HAL_StatusTypeDef spiStatus = HAL_OK;
+	uint8_t latch [1] = {0x80};
+	uint8_t data [1] = {0xff}; //Initializing to when no button is being pressed
+
+	buttonPress buttonPress = NoPress; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
+
+	// Variable to tell us how many times to ask the user for an input
+	uint8_t timesToAsk = 2;
+	uint8_t counter = 0;
+
+	// Sends a logic high to a multiplexer to determine which controller inputs are being read from
+	if (controller == 0){
+		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_RESET);
+	}
+	else{
+		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_SET);
+	}
+
+	// Asking for a user input however many times has been determined above
+	while ((data[0] == 0xff) && (counter < timesToAsk)){
+		counter++;
+		// Asking the user for an input
+		spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
+			// Might need to add a HAL_delay(1) here like above
+		invertedData = ~(data[0]);
+
+		if ((invertedData & a) == a){
+			return APress;
+		}
+		else if ((invertedData & up) == up){
+			return UPress;
+		}
+		else if ((invertedData & down) == down){
+			return DPress;
+		}
+		else if ((invertedData & left) == left){
+			return LPress;
+		}
+		else if ((invertedData & start) == start){
+			return StPress;
+		}
+		else if ((invertedData & select) == select){
+			return SePress;
+		}
+		else if ((invertedData & b) == b){
+			return BPress;
+		}
+		else if ((invertedData & right1) == right1 || (invertedData & right2) == right2){
+			return RPress;
+		}
+	}
+
+	return NoPress;
+
+
+}
+
 /*
  * An additional initialization function to ensure that SPI2 had been initialized to desired specifications
  *
  */
-
 void My_SPI2_INIT(SPI_HandleTypeDef * hspi2){
 
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
