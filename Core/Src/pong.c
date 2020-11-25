@@ -16,7 +16,10 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 	uint8_t ball_in_play = 0;		// making zero before the game starts
 	uint8_t previous_point = 0;		// 1 indicates that player 1 scored last, 2 that player 2 scored last
 	uint8_t quit = 0;				// 0 means that neither player has quit
+
+	// Variable to control the pace of the game
 	uint8_t rallyCount = 0;			// keeping track of the number of collisions to increase speed of the ball
+	uint32_t gameSpeed = 1000; 		// This variable controls how fast the game goes
 
 	// Initializing objects
 	Object ball;
@@ -156,6 +159,9 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 					}
 				}
 			// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
+
+			uint32_t x = 10000;
+			HAL_Delay(x);
 		}
 	}
 
@@ -282,12 +288,6 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 			 ) {
 			collision = 1;
 		}
-		// if the ball is moving right figure out if a collision should be anticipated
-		else if (ball->x_momentum > 0){
-			// the anticipate function advances the ball to where it would collide if it is about to collide
-			anticipateCollision(ball, paddle, rightSide);
-			collision = 1;
-		}
 	}
 	else{
 		if ( (ball->topLeftX  == (paddle->topLeftX + paddle->width) )
@@ -296,28 +296,12 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 			 ) {
 			collision = 1;
 		}
-		else if (ball->x_momentum < 0){
-			// the anticipate function advances the ball to where it would collide if it is about to collide
-			anticipateCollision(ball, paddle, rightSide);
-			collision = 1;
-		}
 	}
-	if (collison){
+
+	if (collision){
 		// Increment the rally count
 		*rallyCount = *rallyCount + 1;
-		// if the rally is a factor of 10 then make the ball go faster if it's not already going as fast as it can
-		if ( (*rallyCount % 10 == 0)
-			&& (ball->x_momentum < MAX_BALL_MOMENTUM)
-			&& (ball->x_momentum > -MAX_BALL_MOMENTUM)
-			){
 
-			// If the ball was already going right
-			if ((ball->x_momentum * -1) < 0 )
-				ball->x_momentum += 1;
-			// if the ball was going left
-			else
-				ball->x_momentum -= 1;
-		}
 		// Just reverse the x momentum
 		ball->x_momentum = -ball->x_momentum;
 		// If the paddle was moving up, pushing the ball up faster (with a max of 10)
@@ -360,6 +344,7 @@ void updateBallPosition(Object * ball){
 }
 
 /*
+ * (UNNECESSARY now that we'll just be reducing the HAL_Delay() at the end of the rally while-loop
  * This function will determine if the ball is about to collide with one of the paddles
  *
  * If so it will advance the ball up to the point where it would satisfy the collision requirement if the game weren't operating
@@ -371,5 +356,5 @@ void updateBallPosition(Object * ball){
  * satisfies the collide condition and 2 pixels up since integer division give us (5/3 = 1, 1 * 2 = 2) ]
  */
 void anticipateCollision(Object * ball, Object * paddle, uint8_t rightSide){
-
+	return;
 }

@@ -16,7 +16,7 @@
 #define BOARD_WIDTH 194
 #define WINNING_SCORE 7
 
-#define MAX_BALL_MOMENTUM 8
+#define MAX_BALL_MOMENTUM 1 // Keeping things simple (get's rid of need for anticipate function)
 
 #define BALL_WIDTH 3
 #define BALL_HEIGHT BALL_WIDTH
