@@ -11,9 +11,14 @@
  * menu_init used for initializing menu upon start up
  */
 void menu_init() {
-	for(int column = 3; column < 197; column++) {
-		for(int row = 3; row < 147; row++) {
-			framebuffer[row][column] = G;
+	for(int column = 0; column < 200; column++) {
+		for(int row = 0; row < 150; row++) {
+			if (column < 3 || column > 196)
+				framebuffer[row][column] = B;
+			else if (row < 3 || row > 146)
+				framebuffer[row][column] = B;
+			else
+				framebuffer[row][column] = G;
 		}
 	}
 	print_string("MAIN  MENU", 10, 0, 18);
@@ -42,7 +47,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 			break;
 		case GameSelection:
 			print_string("CHESS", 5, 2, 32);
-			print_string("GAME TWO", 8, 3, 31);
+			print_string("PONG", 4, 3, 32);
 			print_string("GAME THREE", 10, 4, 30);
 			for(int i = 0; i < 3; i++){
 				if(i != cursorPos) print_string(" ", 1, i + 2, 26);
@@ -53,13 +58,19 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 			switch(sState) {
 				case None:
 					print_string("CHESS", 5, 2, 32);
-					print_string("GAME TWO", 8, 3, 31);
+					print_string("PONG", 4, 3, 32);
 					print_string("GAME THREE", 10, 4, 30);
 					break;
 				case Chess:
 					print_string("CHOOSE PIECE SET", 16, 1, 27);
 					print_string("MODERN PIECES", 13, 2, 28);
 					print_string("CLASSIC PIECES", 14, 3, 28);
+					break;
+				case Pong:
+					print_string("CHOOSE GAME SPEED", 17, 1, 26);
+					print_string("SLOW", 4, 2, 32);
+					print_string("REGULAR", 7, 3, 31);
+					print_string("FAST", 4, 4, 32);
 					break;
 			}
 			for(int i = 0; i < 3; i++){

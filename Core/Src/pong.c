@@ -8,6 +8,12 @@
 #include "pong.h"
 
 void pong_game (SPI_HandleTypeDef *hspi2) {
+	while(1){
+		clearScreen();
+		HAL_Delay(2000);
+		return;
+	}
+
 	// Initializing player scores
 	uint8_t playerOne_score = 0;
 	uint8_t playerTwo_score = 0;
@@ -19,7 +25,7 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 
 	// Variable to control the pace of the game
 	uint8_t rallyCount = 0;			// keeping track of the number of collisions to increase speed of the ball
-	uint32_t gameSpeed = 1000; 		// This variable controls how fast the game goes
+	uint32_t gameSpeed = startingSpeed; 		// This variable controls how fast the game goes (how long to delay between each logic update
 
 	// Initializing objects
 	Object ball;
@@ -45,11 +51,18 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 	buttonPress rightPrevPrevInput = NoPress;
 
 	// (VGA) Display the game controls before the game starts and ask for confirmation before continuing
+	pongStartupScreen();
 		/*
 			Up = move paddle up
 			Down = move paddle down
 			Start = pause the game (can quit to the main menu from here)
 		*/
+
+	while ( (leftInput == NoPress) || (rightInput = NoPress) ){
+		leftInput = getButtonPress_noWait(hspi2, 0);
+		rightInput = getButtonPress_noWait(hspi2, 1);
+	}
+	audio_flag = MENU_CURSOR;
 
 	// Until we've found a winner or one of the players has decided to quit
 	while ((playerOne_score < WINNING_SCORE) && (playerTwo_score < WINNING_SCORE) && (quit == 0)){
@@ -93,6 +106,7 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 					// If a player quits, set quit to 1
 				if (leftInput == StPress){
 					// (VGA) print the pause screen
+					displayPauseScreen();
 						// a = quit to main menu
 						// b = return to game
 					// Ask for inputs until they say "A" or "B"
@@ -101,11 +115,16 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 					}
 					// Set the quit status if they decide to quit
 					if(leftInput == APress){
-						quit = 0;
+						quit = 1;
+					}
+					else{
+						// (VGA) print out the pong game again
+						displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 					}
 				}
 				if (rightInput == StPress){
 					// (VGA) print the pause screen
+					displayPauseScreen();
 						// a = quit to main menu
 						// b = return to game
 					// Ask for inputs until they say "A" or "B"
@@ -114,54 +133,66 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 					}
 					// Set the quit status if they decide to quit
 					if(rightInput == APress){
-						quit = 0;
+						quit = 1;
+					}
+					else{
+						// (VGA) print out the pong game again
+						displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 					}
 				}
-			// Update player paddle objects
-				updatePaddleLocation(&leftPaddle, leftInput, leftPrevInput, leftPrevPrevInput);
-				updatePaddleLocation(&rightPaddle, rightInput, rightPrevInput, rightPrevPrevInput);
-				// (VGA) update the paddle on the screen
+			// Do the rest of the game logic if the user is not quitting
+			if (quit == 0) {
+				// Update player paddle objects
+					updatePaddleLocation(&leftPaddle, leftInput, leftPrevInput, leftPrevPrevInput);
+					updatePaddleLocation(&rightPaddle, rightInput, rightPrevInput, rightPrevPrevInput);
+					// (VGA) update the paddle on the screen
+					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 
-			// Check for ball and paddle collision
-				// if the ball is on the left
-				if (ball.topLeftX < BOARD_WIDTH / 2)
-					checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 0);
-				// if the ball is on the right
-				else
-					checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 1);
+				// Check for ball and paddle collision
+					// if the ball is on the left
+					if (ball.topLeftX < BOARD_WIDTH / 2)
+						checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 0);
+					// if the ball is on the right
+					else
+						checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 1);
 
-			// Update the ball's position
-				updateBallPosition(&ball);
-				// (VGA) Update ball on screen
+				// Update the ball's position
+					updateBallPosition(&ball);
+					// (VGA) Update ball on screen
+					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 
-			// Check if the ball has gone out of bounds
-				// if the ball is on the left
-				if (ball.topLeftX < BOARD_WIDTH / 2){
-					// The ball can still be played if it's on the screen
-					if (ball.topLeftX < 0){
-						ball_in_play = 0;
-						// Update the user scores
-						playerTwo_score++;
-						// Using the chess invalid sound as the sound effect for a point
-						audio_flag = INVALID;
+				// Check if the ball has gone out of bounds
+					// if the ball is on the left
+					if (ball.topLeftX < BOARD_WIDTH / 2){
+						// The ball can still be played if it's on the screen
+						if (ball.topLeftX < 0){
+							ball_in_play = 0;
+							// Update the user scores
+							playerTwo_score++;
+							// Using the chess invalid sound as the sound effect for a point
+							audio_flag = INVALID;
+						}
 					}
-				}
-				// if the ball is on the right
-				else{
-					// The ball can still be played if it's on the screen
-						// this calculation might be wrong
-					if (ball.topLeftX + 2 > BOARD_WIDTH - 1){
-						ball_in_play = 0;
-						// Update the user scores
-						playerOne_score++;
-						// Using the chess invalid sound as the sound effect for a point
-						audio_flag = INVALID;
+					// if the ball is on the right
+					else{
+						// The ball can still be played if it's on the screen
+							// this calculation might be wrong
+						if (ball.topLeftX + 2 > BOARD_WIDTH - 1){
+							ball_in_play = 0;
+							// Update the user scores
+							playerOne_score++;
+							// Using the chess invalid sound as the sound effect for a point
+							audio_flag = INVALID;
+						}
 					}
-				}
-			// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
+				// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
+					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 
-			uint32_t x = 10000;
-			HAL_Delay(x);
+				// Controlling the speed of the game
+				if ( ((rallyCount % 10) == 0) && (gameSpeed > startingSpeed - MAX_GAME_SPEED_INCREASE))
+					gameSpeed -= GAME_SPEED_INCREMENT;
+				HAL_Delay(gameSpeed);
+			}
 		}
 	}
 
@@ -324,12 +355,35 @@ void updateBallPosition(Object * ball){
 
 	// ball is moving up so check the top of the playing field before updating
 	if (ball->y_momentum > 0){
-		// if the ball might move through the top of the screen, just set its position to the top where it would hit and reverse its y direction
+		// Check if the ball is hitting the top of the screen
+		if (ball->topLeftY == BOARD_HEIGHT - 1){
+			// reverse the momentum if it's hitting the top
+			ball->y_momentum = -ball->y_momentum;
 
+			// Want the whole ball to be visible on the screen
+			ball->topLeftY = BOARD_HEIGHT - 1;
+			ball->topLeftX += ball->x_momentum;
+		}
+		else{
+			ball->topLeftY += ball->y_momentum;
+			ball->topLeftX += ball->x_momentum;
+		}
 	}
 	// ball is moving down so check the bottom of the playing field before updating
 	else if (ball->y_momentum < 0){
-		// if the ball might move through the bottom of the screen, just set its position to the bottom where it would hit and reverse its y direction
+		// Check if the ball is hitting the bottom of the screen
+		if (ball->topLeftY - ball->height == 0){
+			// reverse the momentum if it's hitting the top
+			ball->y_momentum = -ball->y_momentum;
+
+			// Want the whole ball to be visible on the screen
+			ball->topLeftY = 0;;
+			ball->topLeftX += ball->x_momentum;
+		}
+		else{
+			ball->topLeftY += ball->y_momentum;
+			ball->topLeftX += ball->x_momentum;
+		}
 
 	}
 	// ball is moving straight
@@ -338,8 +392,6 @@ void updateBallPosition(Object * ball){
 	}
 
 
-	// Update the ball's position based on it's momentum
-				// Check if the ball is colliding with the bottom or top of the field (since we've already checked with the paddles)
 	return;
 }
 

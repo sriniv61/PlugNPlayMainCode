@@ -13,6 +13,7 @@
 #define MAX_WELCOME_OPTIONS 3
 #define MAX_GAMES 3
 #define MAX_CHESS_SETTINGS 2
+#define MAX_PONG_SETTINGS 3
 #define MAX_VOLUME_SETTINGS 3
 
 //typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl} menuState;

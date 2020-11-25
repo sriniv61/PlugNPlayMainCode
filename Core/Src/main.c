@@ -119,6 +119,9 @@ int main(void)
   // Initializing the piece_set being used (in main_menu.h)
   piece_set = 0;
 
+  // Initializing pong setting
+  startingSpeed = 400;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
