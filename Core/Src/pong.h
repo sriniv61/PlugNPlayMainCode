@@ -49,7 +49,6 @@ void pong_game (SPI_HandleTypeDef *hspi2);
 void updatePaddleLocation(Object * paddle, buttonPress curInput, buttonPress lastInput, buttonPress lastLastInput);
 void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCount, uint8_t rightSide);
 void updateBallPosition(Object * ball);
-void anticipateCollision(Object * ball, Object * paddle, uint8_t rightSide);
 
 
 

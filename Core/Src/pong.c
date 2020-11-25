@@ -343,18 +343,3 @@ void updateBallPosition(Object * ball){
 	return;
 }
 
-/*
- * (UNNECESSARY now that we'll just be reducing the HAL_Delay() at the end of the rally while-loop
- * This function will determine if the ball is about to collide with one of the paddles
- *
- * If so it will advance the ball up to the point where it would satisfy the collision requirement if the game weren't operating
- * in discrete time intervals
- *
- * Similar to the checkBallPaddleCollision function except will need a for loop to iterate through the spaces where the ball could be at
- * and see if any of those points have a collision [an imperfect approximation is fine since for example if the x momentum
- * is 3 and y momentum is 5 and the ball is 2 pixels away from colliding, we can just move the ball 2 pixels over so that it
- * satisfies the collide condition and 2 pixels up since integer division give us (5/3 = 1, 1 * 2 = 2) ]
- */
-void anticipateCollision(Object * ball, Object * paddle, uint8_t rightSide){
-	return;
-}
