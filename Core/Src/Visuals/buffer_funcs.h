@@ -33,7 +33,7 @@
  * Main Menu specific enums: defined here until we can fix the issue of
  * this file not being able to see the main_menu.h file that was #included above
  */
-typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl} menuState;
+typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl, ControllerSettings} menuState;
 typedef enum settingsState {None, Chess, Pong} settingsState;
 
 

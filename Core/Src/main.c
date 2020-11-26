@@ -122,6 +122,9 @@ int main(void)
   // Initializing pong setting
   ball_size = 3;
 
+  // Setting the machine to use both controllers
+  two_controller_mode = 1;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */

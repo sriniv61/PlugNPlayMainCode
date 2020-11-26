@@ -33,6 +33,9 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
                         case 2:
                         	state = VolumeControl;
                             break;
+                        case 3:
+                        	state = ControllerSettings;
+                        	break;
                     }
 					cursorPosition = 0;
                     break;
@@ -141,41 +144,41 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 						break;
 				}
 				break;
-				case Pong:
-					switch (button){
-						// Keeping the cursor in bounds
-						case (UPress):
-							if (cursorPosition > 0)
-								cursorPosition--;
-							break;
-						case (DPress):
-							if (cursorPosition < MAX_PONG_SETTINGS - 1)
-								cursorPosition++;
-							break;
-							// Only two options for the chess game
-						case APress:
-							switch (cursorPosition){
-								case 0:
-									ball_size = 3;
-									break;
-								case 1:
-									ball_size = 5;
-									break;
-								case 2:
-									ball_size = 7;
-									break;
-							}
-							state = Welcome;
-							cursorPosition = 0;
-							break;
-						case BPress:
-							sState = None;
-							cursorPosition = 0;
-							break;
-						default:
-							break;
-					}
-					break;
+			case Pong:
+				switch (button){
+					// Keeping the cursor in bounds
+					case (UPress):
+						if (cursorPosition > 0)
+							cursorPosition--;
+						break;
+					case (DPress):
+						if (cursorPosition < MAX_PONG_SETTINGS - 1)
+							cursorPosition++;
+						break;
+						// Only two options for the chess game
+					case APress:
+						switch (cursorPosition){
+							case 0:
+								ball_size = 3;
+								break;
+							case 1:
+								ball_size = 5;
+								break;
+							case 2:
+								ball_size = 7;
+								break;
+						}
+						state = Welcome;
+						cursorPosition = 0;
+						break;
+					case BPress:
+						sState = None;
+						cursorPosition = 0;
+						break;
+					default:
+						break;
+				}
+				break;
 			}
 			break;
         case (VolumeControl):
@@ -214,6 +217,40 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 					break;
 			}
             break;
+		case ControllerSettings:
+			switch(button){
+			// Keeping the cursor in bounds
+				case (UPress):
+					if (cursorPosition > 0)
+						cursorPosition--;
+					break;
+				case (DPress):
+					if (cursorPosition < MAX_CONTROLLER_SETTING - 1)
+						cursorPosition++;
+					break;
+					// Only two options for the chess game
+				case APress:
+					switch (cursorPosition){
+						case 0:
+							two_controller_mode = 0;
+							break;
+						case 1:
+							two_controller_mode = 1;
+							break;
+						default:
+							break;
+					}
+					state = Welcome;
+					cursorPosition = 0;
+					break;
+				case BPress:
+            		state = Welcome;
+					cursorPosition = 0;
+					break;
+				default:
+					break;
+			}
+			break;
         default:
             break;
     }
