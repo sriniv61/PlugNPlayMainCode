@@ -38,6 +38,8 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	buttonPress buttonPress = NoPress; //1=a, 2=up, 3=down, 4=right, 5=left, 6=start, 7=select, 8=b
 
 
+	// Commented for testing purposes
+	/*
 	// Sends a logic high to a multiplexer to determine which controller inputs are being read from
 	if (controller == 0){
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_RESET);
@@ -45,6 +47,7 @@ buttonPress getButtonPress(SPI_HandleTypeDef * hspi2, int controller){
 	else{
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_SET);
 	}
+	*/
 
 	while(data[0] == 0xff) {
 		spiStatus = HAL_SPI_TransmitReceive(hspi2, latch, data, 1, HAL_MAX_DELAY);
@@ -188,6 +191,8 @@ buttonPress getButtonPress_noWait(SPI_HandleTypeDef * hspi2, int controller){
 	uint8_t timesToAsk = 2;
 	uint8_t counter = 0;
 
+	// Commented for testing purposes
+	/*
 	// Sends a logic high to a multiplexer to determine which controller inputs are being read from
 	if (controller == 0){
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_RESET);
@@ -195,6 +200,7 @@ buttonPress getButtonPress_noWait(SPI_HandleTypeDef * hspi2, int controller){
 	else{
 		HAL_GPIO_WritePin(GPIOE, BUTTON_SELECT, GPIO_PIN_SET);
 	}
+	*/
 
 	// Asking for a user input however many times has been determined above
 	while ((data[0] == 0xff) && (counter < timesToAsk)){

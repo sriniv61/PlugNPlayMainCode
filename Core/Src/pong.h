@@ -31,8 +31,8 @@ typedef struct {
     uint8_t width;
     uint8_t height;
 
-    uint8_t x_momentum;  // only used for the ball
-    uint8_t y_momentum;  // only used for the ball
+    int x_momentum;  // only used for the ball
+    int y_momentum;  // only used for the ball
 
 } Object;
 
@@ -43,22 +43,21 @@ typedef struct {
 #define WINNING_SCORE 7
 
 #define MAX_BALL_MOMENTUM 1 // Keeping things simple (get's rid of need for anticipate function)
-#define MAX_GAME_SPEED_INCREASE 200
 #define GAME_SPEED_INCREMENT 10
 
-#define BALL_WIDTH 3
+#define BALL_WIDTH 3		// Standard size, but letting this be set by the user
 #define BALL_HEIGHT BALL_WIDTH
 #define PADDLE_WIDTH 3
-#define PADDLE_HEIGHT 10
+#define PADDLE_HEIGHT 20
 
 
 void pong_game (SPI_HandleTypeDef *hspi2);
-void updatePaddleLocation(Object * paddle, buttonPress curInput, buttonPress lastInput, buttonPress lastLastInput);
+void updatePaddleLocation(Object * paddle, buttonPress curInput);
 void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCount, uint8_t rightSide);
 void updateBallPosition(Object * ball);
 
 
-volatile uint8_t startingSpeed;
+volatile uint8_t ball_size;
 
 
 #endif /* SRC_PONG_H_ */

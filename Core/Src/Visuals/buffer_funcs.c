@@ -21,10 +21,10 @@ void menu_init() {
 				framebuffer[row][column] = G;
 		}
 	}
-	print_string("MAIN  MENU", 10, 0, 18);
-	print_string("> GAME SELECTION", 16, 2, 2);
-	print_string("GAME SETTINGS", 13, 3, 4);
-	print_string("VOLUME", 6, 4, 8);
+	print_string("MAIN  MENU", 10, 0, 18, B, G);
+	print_string("> GAME SELECTION", 16, 2, 2, B, G);
+	print_string("GAME SETTINGS", 13, 3, 4, B, G);
+	print_string("VOLUME", 6, 4, 8, B, G);
 }
 
 /* menu_update
@@ -41,50 +41,50 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 	switch(state){
 		case Welcome:
 			for(int i = 0; i < 3; i++){
-				if(i != cursorPos) print_string(" ", 1, i + 2, 2);
-				else print_string(">", 1, i + 2, 2);
+				if(i != cursorPos) print_string(" ", 1, i + 2, 2, B, G);
+				else print_string(">", 1, i + 2, 2, P, G);
 			}
 			break;
 		case GameSelection:
-			print_string("CHESS", 5, 2, 32);
-			print_string("PONG", 4, 3, 32);
-			print_string("GAME THREE", 10, 4, 30);
+			print_string("CHESS", 5, 2, 32, B, G);
+			print_string("PONG", 4, 3, 32, B, G);
+			print_string("GAME THREE", 10, 4, 30, B, G);
 			for(int i = 0; i < 3; i++){
-				if(i != cursorPos) print_string(" ", 1, i + 2, 26);
-				else print_string(">", 1, i + 2, 26);
+				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
+				else print_string(">", 1, i + 2, 26, P, G);
 			}
 			break;
 		case GameSettings:
 			switch(sState) {
 				case None:
-					print_string("CHESS", 5, 2, 32);
-					print_string("PONG", 4, 3, 32);
-					print_string("GAME THREE", 10, 4, 30);
+					print_string("CHESS", 5, 2, 32, B, G);
+					print_string("PONG", 4, 3, 32, B, G);
+					print_string("GAME THREE", 10, 4, 30, B, G);
 					break;
 				case Chess:
-					print_string("CHOOSE PIECE SET", 16, 1, 27);
-					print_string("MODERN PIECES", 13, 2, 28);
-					print_string("CLASSIC PIECES", 14, 3, 28);
+					print_string("CHOOSE PIECE SET", 16, 1, 27, B, G);
+					print_string("MODERN PIECES", 13, 2, 28, B, G);
+					print_string("CLASSIC PIECES", 14, 3, 28, B, G);
 					break;
 				case Pong:
-					print_string("CHOOSE GAME SPEED", 17, 1, 26);
-					print_string("SLOW", 4, 2, 32);
-					print_string("REGULAR", 7, 3, 31);
-					print_string("FAST", 4, 4, 32);
+					print_string("CHOOSE BALL SIZE", 16, 1, 26, B, G);
+					print_string("SMALL", 5, 2, 31, B, G);
+					print_string("MEDIUM", 6, 3, 31, B, G);
+					print_string("LARGE", 5, 4, 31, B, G);
 					break;
 			}
 			for(int i = 0; i < 3; i++){
-				if(i != cursorPos) print_string(" ", 1, i + 2, 26);
-				else print_string(">", 1, i + 2, 26);
+				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
+				else print_string(">", 1, i + 2, 26, B, G);
 			}
 			break;
 		case VolumeControl:
-			print_string("OFF", 3, 2, 33);
-			print_string("ON", 2, 3, 34);
-			print_string("TEST", 4, 4, 33);
+			print_string("OFF", 3, 2, 33, B, G);
+			print_string("ON", 2, 3, 34, B, G);
+			print_string("TEST", 4, 4, 33, B, G);
 			for(int i = 0; i < 3; i++){
-				if(i != cursorPos) print_string(" ", 1, i + 2, 26);
-				else print_string(">", 1, i + 2, 26);
+				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
+				else print_string(">", 1, i + 2, 26, P, G);
 			}
 			break;
 	}
@@ -96,7 +96,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
  * Pass a string, the amount of characters in the string (a max of 48), the row the string is to be printed on (0 to 7 inclusive),
  * and the start position (from 0 to 47 inclusive, 48 being the max number of characters in a row)
  */
-void print_string(char * str, int size, int row, int startCharPos) {
+void print_string(char * str, int size, int row, int startCharPos, uint8_t charColor, uint8_t backColor) {
 	int startColumn;
 	int startRow;
 	for(int i = 0; i < size; i++){
@@ -106,219 +106,411 @@ void print_string(char * str, int size, int row, int startCharPos) {
 		case 'A':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = a_char[row - startRow][column - startColumn];
+					if (a_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'B':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = b_char[row - startRow][column - startColumn];
+					if (b_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'C':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = c_char[row - startRow][column - startColumn];
+					if (c_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'D':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = d_char[row - startRow][column - startColumn];
+					if (d_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'E':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = e_char[row - startRow][column - startColumn];
+					if (e_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'F':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = f_char[row - startRow][column - startColumn];
+					if (f_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'G':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = g_char[row - startRow][column - startColumn];
+					if (g_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'H':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = h_char[row - startRow][column - startColumn];
+					if (h_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'I':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = i_char[row - startRow][column - startColumn];
+					if (i_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'J':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = j_char[row - startRow][column - startColumn];
+					if (j_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'K':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = k_char[row - startRow][column - startColumn];
+					if (k_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'L':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = l_char[row - startRow][column - startColumn];
+					if (l_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'M':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = m_char[row - startRow][column - startColumn];
+					if (m_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'N':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = n_char[row - startRow][column - startColumn];
+					if (n_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'O':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = o_char[row - startRow][column - startColumn];
+					if (o_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'P':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = p_char[row - startRow][column - startColumn];
+					if (p_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'Q':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = q_char[row - startRow][column - startColumn];
+					if (q_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'R':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = r_char[row - startRow][column - startColumn];
+					if (r_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'S':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = s_char[row - startRow][column - startColumn];
+					if (s_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'T':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = t_char[row - startRow][column - startColumn];
+					if (t_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'U':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = u_char2[row - startRow][column - startColumn];
+					if (u_char2[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'V':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = v_char[row - startRow][column - startColumn];
+					if (v_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'W':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = w_char[row - startRow][column - startColumn];
+					if (w_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'X':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = x_char[row - startRow][column - startColumn];
+					if (x_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'Y':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = y_char[row - startRow][column - startColumn];
+					if (y_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case 'Z':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = z_char[row - startRow][column - startColumn];
+					if (z_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case '=':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = eq_char[row - startRow][column - startColumn];
+					if (eq_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case '?':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = qu_char[row - startRow][column - startColumn];
+					if (qu_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case '>':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = triangle_cursor[row - startRow][column - startColumn];
+					if (triangle_cursor[row - startRow][column - startColumn] == P)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
 		case ' ':
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
-					framebuffer[row][column] = sp_char[row - startRow][column - startColumn];
+					if (sp_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
 				}
 			}
 			break;
+		case '0':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (zero_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '1':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (one_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '2':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (two_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '3':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (three_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '4':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (four_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '5':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (five_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '6':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (six_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '7':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (seven_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '8':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (eight_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case '9':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (nine_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+
 		}
 	}
 }
 
 /*
  * Update_feedback function is aimed at the chess game (but can potentially be used elsewhere)
+ * NOTE: if used elsewhere, the characters will be black and the background will be beige***
  *
  * pass the function a string (with a max of 12 characters, the amount of characters in the string
  * and the desired row (from 0 to 7 inclusive)

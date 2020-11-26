@@ -156,13 +156,13 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 						case APress:
 							switch (cursorPosition){
 								case 0:
-									startingSpeed = 600;
+									ball_size = 3;
 									break;
 								case 1:
-									startingSpeed = 400;
+									ball_size = 5;
 									break;
 								case 2:
-									startingSpeed = 200;
+									ball_size = 7;
 									break;
 							}
 							state = Welcome;

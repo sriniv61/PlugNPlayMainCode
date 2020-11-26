@@ -8,11 +8,6 @@
 #include "pong.h"
 
 void pong_game (SPI_HandleTypeDef *hspi2) {
-	while(1){
-		clearScreen();
-		HAL_Delay(2000);
-		return;
-	}
 
 	// Initializing player scores
 	uint8_t playerOne_score = 0;
@@ -25,7 +20,6 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 
 	// Variable to control the pace of the game
 	uint8_t rallyCount = 0;			// keeping track of the number of collisions to increase speed of the ball
-	uint32_t gameSpeed = startingSpeed; 		// This variable controls how fast the game goes (how long to delay between each logic update
 
 	// Initializing objects
 	Object ball;
@@ -36,29 +30,19 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 	memset(&leftPaddle, 0, sizeof(Object));
 	memset(&rightPaddle, 0, sizeof(Object));
 
-	ball.width = BALL_WIDTH;
-	ball.height = BALL_HEIGHT;
+	ball.width = ball_size;
+	ball.height = ball_size;
 	leftPaddle.width = rightPaddle.width = PADDLE_WIDTH;
 	leftPaddle.height = rightPaddle.height = PADDLE_HEIGHT;
 
 	// Initializing user input variables
-		// need an extra one to account for momentum of the paddle to allow it to move faster
 	buttonPress leftInput = NoPress;
-	buttonPress leftPrevInput = NoPress;
-	buttonPress leftPrevPrevInput = NoPress;
 	buttonPress rightInput = NoPress;
-	buttonPress rightPrevInput = NoPress;
-	buttonPress rightPrevPrevInput = NoPress;
 
 	// (VGA) Display the game controls before the game starts and ask for confirmation before continuing
 	pongStartupScreen();
-		/*
-			Up = move paddle up
-			Down = move paddle down
-			Start = pause the game (can quit to the main menu from here)
-		*/
 
-	while ( (leftInput == NoPress) || (rightInput = NoPress) ){
+	while ( (leftInput == NoPress) && (rightInput = NoPress) ){
 		leftInput = getButtonPress_noWait(hspi2, 0);
 		rightInput = getButtonPress_noWait(hspi2, 1);
 	}
@@ -70,15 +54,16 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 		// Resetting objects
 			// Resetting ball to the middle of the field
 		ball.topLeftX = BOARD_WIDTH/2 - 1;
-		ball.topLeftY = BOARD_HEIGHT/2 +1;
+		ball.topLeftY = BOARD_HEIGHT/2 + 1;
 			// Resetting both paddles to the middle of their respective sides
 		leftPaddle.topLeftX = 1;
 		leftPaddle.topLeftY = BOARD_HEIGHT/2 + 7;
-		rightPaddle.topLeftX = BOARD_WIDTH - 1; 
-		leftPaddle.topLeftY = BOARD_HEIGHT/2 + 7;
+		rightPaddle.topLeftX = BOARD_WIDTH - 4;
+		rightPaddle.topLeftY = BOARD_HEIGHT/2 + 7;
 
-		// wait after scoring to re-serve the ball
-		HAL_Delay(2000);
+		// wait a bit after scoring to re-serve the ball
+		HAL_Delay(1500);
+
 		// Send the ball moving
 			// Update the ball's momentum based on who scored last
 		if (previous_point == 2){
@@ -89,64 +74,61 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 			ball.x_momentum = 1;
 			ball.y_momentum = -1;
 		}
-			// Set ball_in_play to 1
+			// Set ball_in_play
 		ball_in_play = 1;
 
 		// The rally logic
 		while (ball_in_play && (quit == 0)){
 			// Get player inputs
-				leftPrevPrevInput = leftPrevInput;
-				leftPrevInput = leftInput;
 				leftInput = getButtonPress_noWait(hspi2, 0);
 
-				rightPrevPrevInput = rightPrevInput;
-				rightPrevInput = rightInput;
 				rightInput = getButtonPress_noWait(hspi2, 1);
-				// Here we'll handle the pause screen
-					// If a player quits, set quit to 1
-				if (leftInput == StPress){
-					// (VGA) print the pause screen
-					displayPauseScreen();
-						// a = quit to main menu
-						// b = return to game
-					// Ask for inputs until they say "A" or "B"
-					while ((leftInput != APress) && (leftInput != BPress) ) {
-						leftInput = getButtonPress(hspi2, 0);
-					}
-					// Set the quit status if they decide to quit
-					if(leftInput == APress){
-						quit = 1;
-					}
-					else{
-						// (VGA) print out the pong game again
-						displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
-					}
+
+			// Handling the pause screen
+				// If a player quits, set quit to 1
+			if (leftInput == StPress){
+				// (VGA) print the pause screen
+				displayPauseScreen();
+					// a = quit to main menu
+					// b = return to game
+				// Ask for inputs until they say "A" or "B"
+				while ((leftInput != APress) && (leftInput != BPress) ) {
+					leftInput = getButtonPress(hspi2, 0);
 				}
-				if (rightInput == StPress){
-					// (VGA) print the pause screen
-					displayPauseScreen();
-						// a = quit to main menu
-						// b = return to game
-					// Ask for inputs until they say "A" or "B"
-					while ((rightInput != APress) && (rightInput != BPress) ) {
-						rightInput = getButtonPress(hspi2, 1);
-					}
-					// Set the quit status if they decide to quit
-					if(rightInput == APress){
-						quit = 1;
-					}
-					else{
-						// (VGA) print out the pong game again
-						displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
-					}
+				// Set the quit status if they decide to quit
+				if(leftInput == APress){
+					quit = 1;
 				}
+				else{
+					// (VGA) print out the pong game again
+					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
+				}
+			}
+			// Only allowing one user to pause per "clock cycle"
+			else if (rightInput == StPress){
+				// (VGA) print the pause screen
+				displayPauseScreen();
+					// a = quit to main menu
+					// b = return to game
+				// Ask for inputs until they say "A" or "B"
+				while ((rightInput != APress) && (rightInput != BPress) ) {
+					rightInput = getButtonPress(hspi2, 1);
+				}
+				// Set the quit status if they decide to quit
+				if(rightInput == APress){
+					quit = 1;
+				}
+				else{
+					// (VGA) print out the pong game again
+					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
+				}
+			}
+
 			// Do the rest of the game logic if the user is not quitting
 			if (quit == 0) {
 				// Update player paddle objects
-					updatePaddleLocation(&leftPaddle, leftInput, leftPrevInput, leftPrevPrevInput);
-					updatePaddleLocation(&rightPaddle, rightInput, rightPrevInput, rightPrevPrevInput);
-					// (VGA) update the paddle on the screen
-					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
+					updatePaddleLocation(&leftPaddle, leftInput);
+					updatePaddleLocation(&rightPaddle, rightInput);
 
 				// Check for ball and paddle collision
 					// if the ball is on the left
@@ -154,74 +136,66 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 						checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 0);
 					// if the ball is on the right
 					else
-						checkBallPaddleCollision(&leftPaddle, &ball, &rallyCount, 1);
+						checkBallPaddleCollision(&rightPaddle, &ball, &rallyCount, 1);
 
 				// Update the ball's position
 					updateBallPosition(&ball);
-					// (VGA) Update ball on screen
-					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 
-				// Check if the ball has gone out of bounds
-					// if the ball is on the left
-					if (ball.topLeftX < BOARD_WIDTH / 2){
-						// The ball can still be played if it's on the screen
-						if (ball.topLeftX < 0){
-							ball_in_play = 0;
-							// Update the user scores
-							playerTwo_score++;
-							// Using the chess invalid sound as the sound effect for a point
-							audio_flag = INVALID;
-						}
+				// Check if the ball has gone out of bounds on the left side
+				if (ball.topLeftX < 1){
+					ball_in_play = 0;
+					// Update the user scores
+					playerTwo_score++;
+					previous_point = 2;
+					// Using the chess invalid sound as the sound effect for a point
+					audio_flag = INVALID;
+				}
+				// Check if the ball has gone out of bounds on the right side
+				else if (ball.topLeftX + 2 > BOARD_WIDTH - 1){ // this calculation might be wrong
+						ball_in_play = 0;
+						// Update the user scores
+						playerOne_score++;
+						previous_point = 1;
+						// Using the chess invalid sound as the sound effect for a point
+						audio_flag = INVALID;
 					}
-					// if the ball is on the right
-					else{
-						// The ball can still be played if it's on the screen
-							// this calculation might be wrong
-						if (ball.topLeftX + 2 > BOARD_WIDTH - 1){
-							ball_in_play = 0;
-							// Update the user scores
-							playerOne_score++;
-							// Using the chess invalid sound as the sound effect for a point
-							audio_flag = INVALID;
-						}
-					}
+
 				// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
-					displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
-
-				// Controlling the speed of the game
-				if ( ((rallyCount % 10) == 0) && (gameSpeed > startingSpeed - MAX_GAME_SPEED_INCREASE))
-					gameSpeed -= GAME_SPEED_INCREMENT;
-				HAL_Delay(gameSpeed);
+				displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 			}
 		}
 	}
 
-	// Displaying the winning message and sound if there's a winner, otherwise the quitting message
+	// If a user has quit
 	if (quit == 1){
 		// (VGA) displaying the quitting message
 			// Prompt either user to press A to return to main 
-
+		gameOverDisplay(0);
 		leftInput = NoPress;
 		rightInput = NoPress;
-		while ( (leftInput != APress) && (rightInput != APress)){
+		while ( (leftInput != BPress) && (rightInput != BPress)){
 			leftInput = getButtonPress_noWait(hspi2, 0);
 			rightInput = getButtonPress_noWait(hspi2, 1);
 		}
 	}
+	// If a user has won
 	else{
 		// (VGA) Displaying the winning message
 			// Giving the winning sound
 			audio_flag = WINNER;
-			// Prompt the winner to press A
+		// if user one won
 		if (playerOne_score == WINNING_SCORE){
+			gameOverDisplay(1);
 			leftInput = NoPress;
-			while(leftInput != APress) {
+			while(leftInput != BPress) {
 				leftInput = getButtonPress_noWait(hspi2, 0);
 			}
 		}
+		// if user two won
 		else{
+			gameOverDisplay(2);
 			rightInput = NoPress;
-			while (rightInput != APress) {
+			while (rightInput != BPress) {
 				rightInput = getButtonPress_noWait(hspi2, 1);
 			}
 		}
@@ -234,63 +208,32 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
  *
  * The paddle's y_momentum will be used to change the y_momentum of the ball
  */
-void updatePaddleLocation(Object * paddle, buttonPress curInput, buttonPress lastInput, buttonPress lastLastInput){
+void updatePaddleLocation(Object * paddle, buttonPress curInput){
 
 	// Moving Down
 	if (curInput == DPress){
-		// Holding down for three counts
-		if ( (curInput == DPress) && (curInput == lastInput == lastLastInput) ) {
-			if (paddle->topLeftY - paddle->height > 2){
-				paddle->topLeftY-= 3;
-				paddle->y_momentum = -1;
-			}
-			else
-				paddle->topLeftY-= paddle->height;
+		// If the paddle can't go any further down
+		if (paddle->topLeftY - paddle->height <= 0){
+			paddle->topLeftY = paddle->height;
+			paddle->y_momentum = 0;
 		}
-		// Holding down for 2 counts
-		else if ( (curInput == DPress) && (curInput == lastInput) ) {
-			if (paddle->topLeftY - paddle->height > 1){
-				paddle->topLeftY-= 2;
-				paddle->y_momentum = -1;
-			}
-			else
-				paddle->topLeftY-= paddle->height;
-		}
-		// Holding down for 1 count
 		else{
-			if (paddle->topLeftY - paddle->height > 0){
-				paddle->topLeftY-= 1;
-				paddle->y_momentum = -1;
-			}
+			paddle->topLeftY += -1;
+			paddle->y_momentum = -1;
 		}
 	}
 	// Moving Up
 	else if (curInput == UPress){
-		// Holding up for three counts
-		if ( (curInput == UPress) && (curInput == lastInput == lastLastInput) ) {
-			if (paddle->topLeftY < BOARD_HEIGHT-3){
-				paddle->topLeftY+= 3;
-				paddle->y_momentum = 1;
+		// if the paddle can't go any further up
+		if (paddle->topLeftY >= BOARD_HEIGHT){
+			paddle->topLeftY = BOARD_HEIGHT;
+			paddle->y_momentum = 1;
 			}
-			else
-				paddle->topLeftY+= BOARD_HEIGHT-1;
-		}
-		// Holding up for 2 counts
-		else if ( (curInput == UPress) && (curInput == lastInput) ) {
-			if (paddle->topLeftY < BOARD_HEIGHT-2){
-				paddle->topLeftY+= 2;
-				paddle->y_momentum = 1;
-			}
-			else
-				paddle->topLeftY+= BOARD_HEIGHT-1;
-		}
-		// Holding up for 1 count
 		else{
-			if (paddle->topLeftY < BOARD_HEIGHT-1){
-				paddle->topLeftY+= 1;
-				paddle->y_momentum = 1;
-			}
+			paddle->topLeftY += 1;
+			paddle->y_momentum = 1;
 		}
+
 	}
 	// paddle is not moving
 	else{
@@ -302,7 +245,7 @@ void updatePaddleLocation(Object * paddle, buttonPress curInput, buttonPress las
 
 void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCount, uint8_t rightSide){
 
-	// if there is a collison then set this to 1
+	// if there is a collision then set this to 1
 	uint8_t collision = 0;
 
 	/*
@@ -313,7 +256,7 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 	 */
 
 	if(rightSide){
-		if ( (paddle->topLeftX == (ball->topLeftX + ball->width) )
+		if ( (paddle->topLeftX == (ball->topLeftX + ball->width) || paddle->topLeftX + 1 == (ball->topLeftX + ball->width) )
 			&& ( (ball->topLeftY - paddle->topLeftY) < ball->height)
 			&&	( (paddle->topLeftY - ball->topLeftY) < paddle->height)
 			 ) {
@@ -321,7 +264,7 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 		}
 	}
 	else{
-		if ( (ball->topLeftX  == (paddle->topLeftX + paddle->width) )
+		if ( (ball->topLeftX  == (paddle->topLeftX + paddle->width) || ball->topLeftX - 1 == (paddle->topLeftX + paddle->width) )
 			&& ( (ball->topLeftY - paddle->topLeftY) < ball->height)
 			&&	( (paddle->topLeftY - ball->topLeftY) < paddle->height)
 			 ) {
@@ -332,10 +275,9 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 	if (collision){
 		// Increment the rally count
 		*rallyCount = *rallyCount + 1;
-
 		// Just reverse the x momentum
-		ball->x_momentum = -ball->x_momentum;
-		// If the paddle was moving up, pushing the ball up faster (with a max of 10)
+		ball->x_momentum = ball->x_momentum * -1;
+		// If the paddle was moving up, pushing the ball up faster
 		if (paddle->y_momentum == 1){
 			if (ball->y_momentum < MAX_BALL_MOMENTUM)
 				ball->y_momentum += 1;
@@ -344,6 +286,7 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 			if (ball->y_momentum > -MAX_BALL_MOMENTUM)
 				ball->y_momentum -= 1;
 		}
+
 		// Setting sound to main menu cursor sound
 		audio_flag = MENU_CURSOR;
 	}
@@ -353,43 +296,23 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 
 void updateBallPosition(Object * ball){
 
-	// ball is moving up so check the top of the playing field before updating
-	if (ball->y_momentum > 0){
-		// Check if the ball is hitting the top of the screen
-		if (ball->topLeftY == BOARD_HEIGHT - 1){
-			// reverse the momentum if it's hitting the top
-			ball->y_momentum = -ball->y_momentum;
-
-			// Want the whole ball to be visible on the screen
-			ball->topLeftY = BOARD_HEIGHT - 1;
-			ball->topLeftX += ball->x_momentum;
-		}
-		else{
-			ball->topLeftY += ball->y_momentum;
-			ball->topLeftX += ball->x_momentum;
-		}
+	// IF the ball collided with the top of the screen
+	if (ball->topLeftY >= BOARD_HEIGHT) {
+		// Flip the momentum
+		ball->y_momentum = -1;
+		ball->topLeftY = BOARD_HEIGHT - 1;
 	}
-	// ball is moving down so check the bottom of the playing field before updating
-	else if (ball->y_momentum < 0){
-		// Check if the ball is hitting the bottom of the screen
-		if (ball->topLeftY - ball->height == 0){
-			// reverse the momentum if it's hitting the top
-			ball->y_momentum = -ball->y_momentum;
-
-			// Want the whole ball to be visible on the screen
-			ball->topLeftY = 0;;
-			ball->topLeftX += ball->x_momentum;
-		}
-		else{
-			ball->topLeftY += ball->y_momentum;
-			ball->topLeftX += ball->x_momentum;
-		}
-
+	// If the ball collided with the bottom
+	else if (ball->topLeftY - ball->height <= 0){
+		ball->y_momentum = 1;
+		ball->topLeftY = ball->height + 1;
 	}
-	// ball is moving straight
+	// No collision
 	else{
-		ball->topLeftX += ball->x_momentum;
+		ball->topLeftY += ball->y_momentum;
 	}
+	// The x momentum will always be added like this
+	ball->topLeftX += ball->x_momentum;
 
 
 	return;

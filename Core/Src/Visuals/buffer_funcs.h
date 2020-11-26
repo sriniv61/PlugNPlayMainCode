@@ -38,7 +38,7 @@ typedef enum settingsState {None, Chess, Pong} settingsState;
 
 
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);
-void print_string(char * letter_array, int size, int row, int startCharPos);
+void print_string(char * letter_array, int size, int row, int startCharPos, uint8_t characterColor, uint8_t backgroundColor);
 void update_options(gameState state, int promotion);
 void clear_feedback();
 void menu_init();
@@ -67,6 +67,95 @@ static uint8_t triangle_cursor[5][3] = {
  *
  */
 
+static uint8_t one_char[5][3] = {
+
+    {G, B, G},
+    {B, B, G},
+    {G, B, G},
+    {G, B, G},
+    {B, B, B}
+};
+
+static uint8_t two_char[5][3] = {
+
+    {B, B, G},
+    {G, G, B},
+    {G, B, G},
+    {B, G, G},
+    {B, B, B}
+};
+
+static uint8_t three_char[5][3] = {
+
+    {B, B, B},
+    {G, G, B},
+    {G, B, B},
+    {G, G, B},
+    {B, B, B}
+};
+
+static uint8_t four_char[5][3] = {
+
+    {B, G, B},
+    {B, G, B},
+    {B, B, B},
+    {G, G, B},
+    {G, G, B}
+};
+
+static uint8_t five_char[5][3] = {
+
+    {B, B, B},
+    {B, G, G},
+    {B, B, B},
+    {G, G, B},
+    {B, B, G}
+};
+
+static uint8_t six_char[5][3] = {
+
+    {G, B, B},
+    {B, G, G},
+    {B, B, B},
+    {B, G, B},
+    {B, B, B}
+};
+
+static uint8_t seven_char[5][3] = {
+
+    {B, B, B},
+    {G, G, B},
+    {G, B, G},
+    {B, G, G},
+    {B, G, G}
+};
+
+static uint8_t eight_char[5][3] = {
+
+    {B, B, B},
+    {B, G, B},
+    {B, B, B},
+    {B, G, B},
+    {B, B, B}
+};
+
+static uint8_t nine_char[5][3] = {
+
+    {B, B, B},
+    {B, G, B},
+    {B, B, B},
+    {G, G, B},
+    {B, B, G}
+};
+
+static uint8_t zero_char[5][3] = {
+
+    {G, B, G},
+    {B, G, B},
+    {B, G, B},
+    {B, G, B},
+    {G, B, G}
+};
 
 static uint8_t a_char[5][3] = {
 

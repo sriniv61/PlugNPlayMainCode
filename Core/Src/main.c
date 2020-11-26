@@ -120,7 +120,7 @@ int main(void)
   piece_set = 0;
 
   // Initializing pong setting
-  startingSpeed = 400;
+  ball_size = 3;
 
   /* USER CODE END Init */
 
