@@ -25,7 +25,7 @@ void menu_init() {
 	print_string("> GAME SELECTION", 16, 2, 2, B, G);
 	print_string("GAME SETTINGS", 13, 3, 4, B, G);
 	print_string("VOLUME", 6, 4, 8, B, G);
-	print_string("CONTROL SET", 11, 5, 5, B, G);
+	print_string("CONTROL SET", 11, 5, 6, B, G);
 }
 
 /* menu_update
@@ -76,7 +76,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 			}
 			for(int i = 0; i < 3; i++){
 				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
-				else print_string(">", 1, i + 2, 26, B, G);
+				else print_string(">", 1, i + 2, 26, P, G);
 			}
 			break;
 		case VolumeControl:
