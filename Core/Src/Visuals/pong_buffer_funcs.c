@@ -6,6 +6,7 @@
  */
 
 #include "pong_buffer_funcs.h"
+#include "vga.h"
 
 
 /*
@@ -41,11 +42,20 @@ void displayPauseScreen(){
  * Function for displaying the score, the ball, and both paddles
  */
 void displayGame(uint8_t player1Score, uint8_t player2Score, Object* ball, Object * leftPaddle, Object * rightPaddle){
-	clearScreen();
-	printScore(player1Score, player2Score);
-	printObject(leftPaddle);
-	printObject(rightPaddle);
-	printObject(ball);
+
+	// Checking for drawNewFrame Ensures that the visuals look smooth (only necessary sometimes)
+	if(drawNewFrame){
+		clearScreen();
+		printScore(player1Score, player2Score);
+		printObject(leftPaddle);
+		printObject(rightPaddle);
+		printObject(ball);
+
+		drawNewFrame = 0;
+	}
+	// if we can't draw, throw a delay so that the game doesn't go too fast for the user
+	else
+		HAL_Delay(10);
 }
 
 void gameOverDisplay(uint8_t player){

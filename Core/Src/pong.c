@@ -215,25 +215,24 @@ void updatePaddleLocation(Object * paddle, buttonPress curInput){
 		// If the paddle can't go any further down
 		if (paddle->topLeftY - paddle->height <= 0){
 			paddle->topLeftY = paddle->height;
-			paddle->y_momentum = 0;
 		}
 		else{
 			paddle->topLeftY += -1;
-			paddle->y_momentum = -1;
 		}
+		// Set momentum to down regardless
+		paddle->y_momentum = -1;
 	}
 	// Moving Up
 	else if (curInput == UPress){
 		// if the paddle can't go any further up
 		if (paddle->topLeftY >= BOARD_HEIGHT){
 			paddle->topLeftY = BOARD_HEIGHT;
-			paddle->y_momentum = 1;
 			}
 		else{
 			paddle->topLeftY += 1;
-			paddle->y_momentum = 1;
 		}
-
+		// Set momentum to up regardless
+		paddle->y_momentum = 1;
 	}
 	// paddle is not moving
 	else{
