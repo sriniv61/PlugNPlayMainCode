@@ -240,6 +240,7 @@ buttonPress getButtonPress_noWait(SPI_HandleTypeDef * hspi2, int controller){
 
 }
 
+
 /*
  * An additional initialization function to ensure that SPI2 had been initialized to desired specifications
  *

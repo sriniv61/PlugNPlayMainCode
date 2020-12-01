@@ -49,7 +49,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 		case GameSelection:
 			print_string("CHESS", 5, 2, 32, B, G);
 			print_string("PONG", 4, 3, 32, B, G);
-			print_string("GAME THREE", 10, 4, 30, B, G);
+			print_string("SNAKE", 5, 4, 32, B, G);
 			for(int i = 0; i < 3; i++){
 				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
 				else print_string(">", 1, i + 2, 26, P, G);
@@ -60,7 +60,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 				case None:
 					print_string("CHESS", 5, 2, 32, B, G);
 					print_string("PONG", 4, 3, 32, B, G);
-					print_string("GAME THREE", 10, 4, 30, B, G);
+					print_string("SNAKE", 5, 4, 32, B, G);
 					break;
 				case Chess:
 					print_string("CHOOSE PIECE SET", 16, 1, 27, B, G);
@@ -70,11 +70,17 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
 				case Pong:
 					print_string("CHOOSE BALL SIZE", 16, 1, 26, B, G);
 					print_string("SMALL", 5, 2, 31, B, G);
-					print_string("MEDIUM", 6, 3, 31, B, G);
-					print_string("LARGE", 5, 4, 31, B, G);
+					print_string("LARGE", 5, 3, 31, B, G);
+					break;
+				case Snake:
+					print_string("CHOOSE GAME SPEED", 17, 1, 25, B, G);
+					print_string("SLOW", 4, 2, 31, B, G);
+					print_string("NORMAL", 6, 3, 30, B, G);
+					print_string("FAST", 4, 4, 31, B, G);
+					print_string("VERY FAST", 9, 5, 30, B, G);
 					break;
 			}
-			for(int i = 0; i < 3; i++){
+			for(int i = 0; i < 4; i++){
 				if(i != cursorPos) print_string(" ", 1, i + 2, 26, B, G);
 				else print_string(">", 1, i + 2, 26, P, G);
 			}

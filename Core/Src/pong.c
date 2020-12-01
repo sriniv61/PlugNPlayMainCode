@@ -65,17 +65,20 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 		HAL_Delay(1500);
 
 		// Send the ball moving
+		game_speed = 1;
+		rallyCount = 0;
 			// Update the ball's momentum based on who scored last
 		if (previous_point == 2){
-			ball.x_momentum = -1;
+			ball.x_momentum = -game_speed;
 			ball.y_momentum = -1;
 		}
 		else{
-			ball.x_momentum = 1;
+			ball.x_momentum = game_speed;
 			ball.y_momentum = -1;
 		}
 			// Set ball_in_play
 		ball_in_play = 1;
+
 
 		// The rally logic
 		while (ball_in_play && (quit == 0)){
@@ -162,6 +165,10 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 
 				// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
 				displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
+
+				// After the players touch the ball enough times
+				if (rallyCount >= 5)
+					game_speed = 2;
 			}
 		}
 	}
@@ -260,6 +267,8 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 			&&	( (paddle->topLeftY - ball->topLeftY) < paddle->height)
 			 ) {
 			collision = 1;
+			// Just reverse the x momentum
+			ball->x_momentum = -game_speed;
 		}
 	}
 	else{
@@ -268,14 +277,14 @@ void checkBallPaddleCollision(Object * paddle, Object * ball, uint8_t * rallyCou
 			&&	( (paddle->topLeftY - ball->topLeftY) < paddle->height)
 			 ) {
 			collision = 1;
+			// Just reverse the x momentum
+			ball->x_momentum = game_speed;
 		}
 	}
 
 	if (collision){
 		// Increment the rally count
 		*rallyCount = *rallyCount + 1;
-		// Just reverse the x momentum
-		ball->x_momentum = ball->x_momentum * -1;
 		// If the paddle was moving up, pushing the ball up faster
 		if (paddle->y_momentum == 1){
 			if (ball->y_momentum < MAX_BALL_MOMENTUM)

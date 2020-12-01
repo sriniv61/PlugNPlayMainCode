@@ -70,6 +70,12 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 						menu_init();
 						state = Welcome;
 						break;
+					case 2:
+						snake_main(hspi2);
+						cursorPosition = 0;
+						menu_init();
+						state = Welcome;
+						break;
 					default:
 						// Only want to do the things above so that the main menu stays where it is
 						break;
@@ -105,6 +111,10 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 								break;
 							case 1:
 								sState = Pong;
+								cursorPosition = 0;
+								break;
+							case 2:
+								sState = Snake;
 								cursorPosition = 0;
 								break;
 							default:
@@ -164,8 +174,43 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 							case 1:
 								ball_size = 5;
 								break;
+						}
+						state = Welcome;
+						cursorPosition = 0;
+						break;
+					case BPress:
+						sState = None;
+						cursorPosition = 0;
+						break;
+					default:
+						break;
+				}
+				break;
+			case Snake:
+				switch (button){
+					// Keeping the cursor in bounds
+					case (UPress):
+						if (cursorPosition > 0)
+							cursorPosition--;
+						break;
+					case (DPress):
+						if (cursorPosition < MAX_SNAKE_SETTINGS - 1)
+							cursorPosition++;
+						break;
+						// Only two options for the chess game
+					case APress:
+						switch (cursorPosition){
+							case 0:
+								snake_framesPerMove = 20;
+								break;
+							case 1:
+								snake_framesPerMove = 15;
+								break;
 							case 2:
-								ball_size = 7;
+								snake_framesPerMove = 10;
+								break;
+							case 3:
+								snake_framesPerMove = 3;
 								break;
 						}
 						state = Welcome;

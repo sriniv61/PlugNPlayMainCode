@@ -34,7 +34,7 @@
  * this file not being able to see the main_menu.h file that was #included above
  */
 typedef enum menuState {Welcome, GameSelection, GameSettings, VolumeControl, ControllerSettings} menuState;
-typedef enum settingsState {None, Chess, Pong} settingsState;
+typedef enum settingsState {None, Chess, Pong, Snake} settingsState;
 
 
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);

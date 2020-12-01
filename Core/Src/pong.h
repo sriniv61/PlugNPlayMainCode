@@ -58,6 +58,7 @@ void updateBallPosition(Object * ball);
 
 
 volatile uint8_t ball_size;
+volatile uint8_t game_speed;
 
 
 #endif /* SRC_PONG_H_ */
