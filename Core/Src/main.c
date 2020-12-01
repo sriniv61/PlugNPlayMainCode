@@ -121,7 +121,7 @@ int main(void)
 
   // Initializing pong setting
   ball_size = 3;
-  game_speed = 1;	// Can potentially be a setting in the future (is not setting currently)
+  game_speed = 2;	// Can potentially be a setting in the future (is not setting currently)
 
   // Initializing snake setting
   snake_framesPerMove = 15 ;

@@ -145,7 +145,7 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 					updateBallPosition(&ball);
 
 				// Check if the ball has gone out of bounds on the left side
-				if (ball.topLeftX < 1){
+				if (ball.topLeftX < 2){
 					ball_in_play = 0;
 					// Update the user scores
 					playerTwo_score++;
@@ -155,13 +155,13 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 				}
 				// Check if the ball has gone out of bounds on the right side
 				else if (ball.topLeftX + 2 > BOARD_WIDTH - 1){ // this calculation might be wrong
-						ball_in_play = 0;
-						// Update the user scores
-						playerOne_score++;
-						previous_point = 1;
-						// Using the chess invalid sound as the sound effect for a point
-						audio_flag = INVALID;
-					}
+					ball_in_play = 0;
+					// Update the user scores
+					playerOne_score++;
+					previous_point = 1;
+					// Using the chess invalid sound as the sound effect for a point
+					audio_flag = INVALID;
+				}
 
 				// (VGA) Display the score on the screen (always want this to be showing at the top of the screen)
 				displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
@@ -172,6 +172,7 @@ void pong_game (SPI_HandleTypeDef *hspi2) {
 			}
 		}
 	}
+	displayGame(playerOne_score, playerTwo_score, &ball, &leftPaddle, &rightPaddle);
 
 	// If a user has quit
 	if (quit == 1){
@@ -224,7 +225,7 @@ void updatePaddleLocation(Object * paddle, buttonPress curInput){
 			paddle->topLeftY = paddle->height;
 		}
 		else{
-			paddle->topLeftY += -1;
+			paddle->topLeftY += -2;
 		}
 		// Set momentum to down regardless
 		paddle->y_momentum = -1;
@@ -236,7 +237,7 @@ void updatePaddleLocation(Object * paddle, buttonPress curInput){
 			paddle->topLeftY = BOARD_HEIGHT;
 			}
 		else{
-			paddle->topLeftY += 1;
+			paddle->topLeftY += 2;
 		}
 		// Set momentum to up regardless
 		paddle->y_momentum = 1;
