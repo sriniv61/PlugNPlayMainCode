@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "bb.h"
 #include "util.h"
-#include "../../flash.h"
+#include "../../External/flash.h"
 
 bb BB_KNIGHT[64];
 bb BB_KING[64];
