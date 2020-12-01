@@ -10,7 +10,7 @@
 
 #include "buffer_funcs.h"
 #include "main.h"
-#include "../pong.h"
+#include "../Games/pong.h"
 
 
 // Functions called from the pong game

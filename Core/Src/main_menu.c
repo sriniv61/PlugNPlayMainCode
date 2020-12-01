@@ -71,7 +71,7 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 						state = Welcome;
 						break;
 					case 2:
-						snake_main(hspi2);
+						while(snake_main(hspi2) == APress);
 						cursorPosition = 0;
 						menu_init();
 						state = Welcome;
@@ -201,13 +201,13 @@ void state_change(buttonPress button, SPI_HandleTypeDef * hspi2){
 					case APress:
 						switch (cursorPosition){
 							case 0:
-								snake_framesPerMove = 20;
-								break;
-							case 1:
 								snake_framesPerMove = 15;
 								break;
-							case 2:
+							case 1:
 								snake_framesPerMove = 10;
+								break;
+							case 2:
+								snake_framesPerMove = 5;
 								break;
 							case 3:
 								snake_framesPerMove = 3;

@@ -10,8 +10,8 @@
 
 #include "../Inc/main.h"
 #include "vga.h"
-#include "../Chess/board.h"
-#include "../Chess/uci.h"
+#include "../Games/Chess/board.h"
+#include "../Games/Chess/uci.h"
 #include "../main_menu.h"
 
 #define GRAY 42		// pixel value for gray
@@ -38,7 +38,7 @@ typedef enum settingsState {None, Chess, Pong, Snake} settingsState;
 
 
 void update_square(int position, uint8_t piece, int pieceColorBit, int highlighted, int cursor, int perspective);
-void print_string(char * letter_array, int size, int row, int startCharPos, uint8_t characterColor, uint8_t backgroundColor);
+void print_string(char * letter_array, int size, float row, int startCharPos, uint8_t characterColor, uint8_t backgroundColor);
 void update_options(gameState state, int promotion);
 void clear_feedback();
 void menu_init();
@@ -415,6 +415,15 @@ static uint8_t eq_char[5][3] = {
     {B, B, B},
     {G, G, G},
     {B, B, B},
+    {G, G, G}
+};
+
+static uint8_t co_char[5][3] = {
+
+	{G, G, G},
+    {G, B, G},
+    {G, G, G},
+    {G, B, G},
     {G, G, G}
 };
 

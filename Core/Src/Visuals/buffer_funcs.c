@@ -112,7 +112,7 @@ void menu_update(int cursorPos, menuState state, settingsState sState)  {
  * Pass a string, the amount of characters in the string (a max of 48), the row the string is to be printed on (0 to 7 inclusive),
  * and the start position (from 0 to 47 inclusive, 48 being the max number of characters in a row)
  */
-void print_string(char * str, int size, int row, int startCharPos, uint8_t charColor, uint8_t backColor) {
+void print_string(char * str, int size, float row, int startCharPos, uint8_t charColor, uint8_t backColor) {
 	int startColumn;
 	int startRow;
 	for(int i = 0; i < size; i++){
@@ -413,6 +413,16 @@ void print_string(char * str, int size, int row, int startCharPos, uint8_t charC
 			for(int column = startColumn; column < startColumn + 3; column++) {
 				for(int row = startRow; row < startRow + 5; row++) {
 					if (sp_char[row - startRow][column - startColumn] == B)
+						framebuffer[row][column] = charColor;
+					else
+						framebuffer[row][column] = backColor;
+				}
+			}
+			break;
+		case ':':
+			for(int column = startColumn; column < startColumn + 3; column++) {
+				for(int row = startRow; row < startRow + 5; row++) {
+					if (co_char[row - startRow][column - startColumn] == B)
 						framebuffer[row][column] = charColor;
 					else
 						framebuffer[row][column] = backColor;
