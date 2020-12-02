@@ -21,7 +21,7 @@ get rid of the computer and to allow for direct user inputs.
 
 ## Note on running the project
 
-Currently, the project needs to be imported directly and changed the name of the folder needs to be changed to "dummyFolder"
+Currently, the project needs to be imported directly and the name of the folder needs to be changed to "dummyFolder"
 
 ## Sources:
 
