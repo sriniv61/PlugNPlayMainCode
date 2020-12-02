@@ -19,6 +19,10 @@ Connecting the controllers was achieved by using of SPI and an external multiple
 The games that were developed were chess, pong, and snake. Chess was sourced from https://github.com/fogleman/MisterQueen and modified to 
 get rid of the computer and to allow for direct user inputs.
 
+## Note on running the project
+
+Currently, the project needs to be imported directly and changed the name of the folder needs to be changed to "dummyFolder"
+
 ## Sources:
 
 Chess game -> https://github.com/fogleman/MisterQueen
