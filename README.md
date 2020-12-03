@@ -3,7 +3,7 @@
 Terrence Randall, 
 Gokul Srinivasan,
 Eric Bankert, 
-Arpan Adhikar
+Arpan Adhikari
 
 ## Project Description
 
