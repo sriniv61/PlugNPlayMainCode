@@ -1,7 +1,7 @@
 # Plug-&-Play Game Console
 ## Team 10:
-Terrence Randall, 
-Gokul Srinivasan,
+Terrence Randall (terrencetjr24@gmail.com), 
+Gokul Srinivasan (gokss14@gmail.com),
 Eric Bankert, 
 Arpan Adhikari
 
