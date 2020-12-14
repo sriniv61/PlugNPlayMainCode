@@ -3,7 +3,9 @@
 Terrence Randall (terrencetjr24@gmail.com),
 
 Gokul Srinivasan (gokss14@gmail.com),
+
 Eric Bankert, 
+
 Arpan Adhikari
 
 ## Project Description
