@@ -8,6 +8,9 @@ Eric Bankert,
 
 Arpan Adhikari
 
+## Project Video Demo
+https://youtu.be/yv9IzvJPBAE
+
 ## Project Description
 
 A gaming console developed around the STM32F407 microcontroller. The device outputs a VGA signal to provide video,
